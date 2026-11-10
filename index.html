@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BarangayDocs · Request barangay documents online</title>
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+<!-- Landing page: shown by default. Auth screens open at #login, #register, #forgot -->
+<div id="landing">
+<header class="nav">
+  <a class="brand" href="#top" aria-label="BarangayDocs home">
+    <span class="mark"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+    <span class="wm"><b>Barangay<span>Docs</span></b><small>Civic portal</small></span>
+  </a>
+  <nav class="links" aria-label="Main">
+    <a class="active" href="#top"><svg class="i" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</a>
+    <a href="#services"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>About Services</a>
+    <a href="#track"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Track Request</a>
+    <a href="#contact"><svg class="i" viewBox="0 0 24 24"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg>Contact Support</a>
+  </nav>
+  <div class="acts">
+    <a class="b" href="#login">Login</a>
+    <a class="b p" href="#register">Register</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="hero-l">
+      <span class="tag">🚀 Swift &amp; Secured Barangay Digital Services</span>
+      <h1>Request barangay documents online — <em>no more waiting in line.</em></h1>
+      <p class="lead">Experience hassle-free transactions with your local barangay unit. Request clearances, indigency certificates, and business permits anytime, anywhere, and track your request real-time.</p>
+      <div class="ctas">
+        <a class="cta p" href="#login">Request a Document <svg class="i" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        <a class="cta s" href="#track">Track Request Status</a>
+      </div>
+      <div class="metrics">
+        <div><b style="color:var(--blue)">10 Minute</b><small>Average online filing time</small></div>
+        <div><b style="color:var(--teal)">15,000+</b><small>Happy residents nationwide</small></div>
+      </div>
+    </div>
+    <!-- Put the hero photo at assets/img/hero.jpg. It hides itself if missing. -->
+    <div class="hero-r"><img src="assets/img/hero.jpg" alt="Barangay reception staff helping residents at the front desk" onerror="this.remove()"></div>
+  </section>
+
+  <section class="track" id="track" aria-labelledby="track-h">
+    <div>
+      <h3 id="track-h">Already submitted a request?</h3>
+      <p>Enter your unique tracking code below to inspect state instantly.</p>
+    </div>
+    <form id="track-form" novalidate>
+      <label class="tin"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="code" placeholder="e.g. BR-2026-00125-K7Q9X" aria-label="Tracking code" autocomplete="off"></label>
+      <button class="tbtn" type="submit" id="track-btn">Track Now</button>
+    </form>
+  </section>
+
+  <section class="tres" id="track-result" aria-live="polite" hidden></section>
+
+  <section class="sec w" id="services" aria-labelledby="how-h">
+    <div class="intro">
+      <small>Process Pipeline</small>
+      <h2 id="how-h">How BarangayDocs Works</h2>
+      <p>From registration to claims, our streamlined government process guarantees efficiency at every turn.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="badge">01</div><h4>Online Request</h4><p>Fill up the quick form and upload supporting requirements from your phone or computer.</p></div>
+      <div class="step"><div class="badge">02</div><h4>Barangay Review</h4><p>Barangay staff verifies details against database records to validate request legitimacy.</p></div>
+      <div class="step"><div class="badge">03</div><h4>Processing</h4><p>The document is queued, digitally signed, sealed, and approved by officers.</p></div>
+      <div class="step on"><div class="badge">04</div><h4>Ready for Claim</h4><p>Receive a calendar invite or SMS notifying you that the document is ready to pick up.</p></div>
+      <div class="step"><div class="badge">05</div><h4>Claim &amp; Secure</h4><p>Head directly to the express desk to present your verification tracking number and grab your file.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="feat-h">
+    <div class="intro">
+      <small class="t">Core Advantages</small>
+      <h2 id="feat-h">Civic Services Built For You</h2>
+    </div>
+    <div class="feats">
+      <article class="feat"><div class="fi"><svg class="i" viewBox="0 0 24 24"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><rect width="8" height="5" x="2" y="13" rx="1"/><path d="M8 13v-2a2 2 0 1 0-4 0v2"/></svg></div><h4>Official Certifications</h4><p>Apply for standard documents including Barangay Clearance, Certificate of Residency, Indigency, and Business Permits with legal confidence.</p></article>
+      <article class="feat"><div class="fi"><svg class="i" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div><h4>Live Progress Monitor</h4><p>Never wonder about document state. Follow our clean visual timeline trackers updated instantly by barangay staff.</p></article>
+      <article class="feat"><div class="fi"><svg class="i" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4"/><path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18M19 16v6M16 19h6"/></svg></div><h4>Scheduled Claim Times</h4><p>Select preferred calendar slots to secure priority service. Arrive and receive documents immediately upon arrival.</p></article>
+      <article class="feat"><div class="fi"><svg class="i" viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M22 8c0-2.3-.8-4.3-2-6M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326M4 2C2.8 3.7 2 5.7 2 8"/></svg></div><h4>Instant Notification Alerts</h4><p>Keep updated via immediate SMS and Email triggers when requests shift from validation review to completed state.</p></article>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="ft">
+    <div class="fl">
+      <div class="brand">
+        <span class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+        <span class="wm"><b>BarangayDocs</b><small>Civic portal</small></span>
+      </div>
+      <p>Making civic digital documentation accessible, safe, and transparent for every single resident in the community.</p>
+    </div>
+    <div class="fg">
+      <div><h5>Services</h5><span>Barangay Clearance</span><span>Residency Certificate</span><span>Indigency Certificate</span></div>
+      <div><h5>Government</h5><span>DILG Portal</span><span>City Operations</span><span>Civic Guidelines</span></div>
+    </div>
+  </div>
+  <div class="fb">
+    <span>© 2026 BarangayDocs. Created in partnership with Local Government Units.</span>
+    <span>Hotline Support: (02) 8888-1234 &nbsp;|&nbsp; support@barangaydocs.gov.ph</span>
+  </div>
+</footer>
+</div>
+
+<!-- Auth: sign in, register, OTP, forgot / reset password -->
+<div id="auth" hidden>
+<div class="page">
+  <aside class="brand">
+    <a class="logo" href="#home" aria-label="Back to BarangayDocs home">
+      <span class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+      <span><b>BarangayDocs</b><small>CIVIC PORTAL</small></span>
+    </a>
+    <div class="intro">
+      <h1>Your direct link to municipal document requests.</h1>
+      <p id="intro-p">Securely register your community residency records today to file requests, review transaction histories, and communicate with local officials directly.</p>
+    </div>
+    <div class="privacy">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+      <p>Data processed according to Philippines Republic Act 10173 (Data Privacy Act of 2012)</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="progress" id="progress" hidden></div>
+
+    <div class="card">
+
+      <!-- LOGIN -->
+      <section class="view" id="view-login" aria-labelledby="t-login">
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="true" data-go="login">Sign In</button>
+          <button role="tab" aria-selected="false" data-go="register">Register Account</button>
+        </div>
+        <div class="head">
+          <h2 id="t-login">Welcome back!</h2>
+          <p>Enter your credentials to access your citizen dashboard.</p>
+        </div>
+        <div class="banner" id="login-banner" role="alert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <span>Incorrect email or password. Check your details and try again.</span>
+        </div>
+        <form id="login-form" novalidate>
+          <div class="fields">
+            <div class="field">
+              <label for="l-id">Email Address / Citizen ID</label>
+              <div class="input"><input id="l-id" name="id" autocomplete="username" required></div>
+              <p class="error" data-for="l-id">Enter your email address or Citizen ID.</p>
+            </div>
+            <div class="field">
+              <div class="label-row">
+                <label for="l-pw">Password</label>
+                <button type="button" class="link" id="forgot">Forgot password?</button>
+              </div>
+              <div class="input">
+                <input id="l-pw" name="password" type="password" autocomplete="current-password" required>
+                <button type="button" class="icon-btn" data-toggle="l-pw" aria-label="Show password"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+              <p class="error" data-for="l-pw">Enter your password.</p>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn" type="submit" id="login-btn">Sign In to Dashboard</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- REGISTER STEP 1 -->
+      <section class="view" id="view-reg1" aria-labelledby="t-reg1">
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="false" data-go="login">Login</button>
+          <button role="tab" aria-selected="true" data-go="register">Register Account</button>
+        </div>
+        <div class="head">
+          <h2 id="t-reg1">Create your account</h2>
+          <p>Register to file documents and track your requests.</p>
+          <p class="req">All fields are required.</p>
+        </div>
+        <form id="reg1-form" novalidate>
+          <div class="fields">
+            <div class="field">
+              <label for="r-email">Email</label>
+              <div class="input"><input id="r-email" type="email" placeholder="you@example.com" autocomplete="email" required></div>
+              <p class="error" data-for="r-email" id="r-email-err">Enter a valid email address.</p>
+            </div>
+            <div class="field">
+              <label for="r-pw">Password</label>
+              <div class="input">
+                <input id="r-pw" type="password" placeholder="Create a password" autocomplete="new-password" required>
+                <button type="button" class="icon-btn" data-toggle="r-pw" aria-label="Show password"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+              <p class="hint">8+ characters, uppercase, lowercase, number and symbol.</p>
+              <p class="error" data-for="r-pw">Password must have 8+ characters with uppercase, lowercase, a number and a symbol.</p>
+            </div>
+            <div class="field">
+              <label for="r-pw2">Confirm Password</label>
+              <div class="input">
+                <input id="r-pw2" type="password" placeholder="Re-enter your password" autocomplete="new-password" required>
+                <button type="button" class="icon-btn" data-toggle="r-pw2" aria-label="Show password"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+              <p class="error" data-for="r-pw2">Passwords don’t match.</p>
+            </div>
+          </div>
+          <button class="btn" type="submit" id="reg1-next">Next</button>
+        </form>
+      </section>
+
+      <!-- REGISTER STEP 2 -->
+      <section class="view" id="view-reg2" aria-labelledby="t-reg2">
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="false" data-go="login">Login</button>
+          <button role="tab" aria-selected="true" data-go="register">Register Account</button>
+        </div>
+        <div class="head">
+          <h2 id="t-reg2">Create your account</h2>
+          <p>Register to file documents and track your requests.</p>
+          <p class="req">All fields are required.</p>
+        </div>
+        <form id="reg2-form" novalidate>
+          <div class="fields">
+            <div class="field">
+              <label for="r-name">Full Name</label>
+              <div class="input"><input id="r-name" placeholder="Enter your full legal name" autocomplete="name" required></div>
+              <p class="error" data-for="r-name">Enter your full legal name.</p>
+            </div>
+            <div class="field">
+              <label for="r-dob">Date of Birth</label>
+              <div class="input"><input id="r-dob" type="date" required></div>
+              <p class="hint">You must be 18 years old or above to register.</p>
+              <p class="error" data-for="r-dob">Enter a valid date of birth.</p>
+            </div>
+            <div class="field">
+              <label for="r-phone">Phone Number</label>
+              <div class="input"><input id="r-phone" type="tel" inputmode="numeric" placeholder="09XX XXX XXXX" autocomplete="tel" maxlength="13" required></div>
+              <p class="error" data-for="r-phone">Enter an 11-digit mobile number starting with 09.</p>
+            </div>
+            <div class="field" id="id-field">
+              <span class="lbl">Valid ID</span>
+              <label class="upload" for="r-id">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                <span class="name empty" id="id-name">Choose a file</span>
+                <span class="browse">Browse</span>
+              </label>
+              <input id="r-id" type="file" accept=".jpg,.jpeg,.png,.pdf" hidden>
+              <p class="hint">JPG, PNG or PDF · maximum 5 MB. Upload a clear, complete valid ID with a readable name and photo.</p>
+              <p class="error" id="id-error">Upload a valid ID.</p>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn" type="submit">Register</button>
+            <button class="btn secondary" type="button" data-go="register">Back</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- OTP -->
+      <section class="view" id="view-otp" aria-labelledby="t-otp">
+        <div class="head">
+          <h2 id="t-otp">Verify your email</h2>
+          <p>Enter the 6-digit code sent to</p>
+          <p style="color:var(--text);font-weight:600" id="otp-email">you@example.com</p>
+        </div>
+        <form id="otp-form" novalidate>
+          <div>
+            <div class="otp" id="otp" role="group" aria-label="6-digit code"></div>
+            <p class="error" id="otp-error" style="margin-top:8px"></p>
+            <p class="hint" id="demo-otp" style="margin-top:8px" hidden></p>
+          </div>
+          <div class="row-between"><span style="color:var(--muted)">Code expires in</span><span class="t" id="exp">05:00</span></div>
+          <button class="btn" type="submit" id="verify">Verify</button>
+          <div class="field">
+            <button class="btn ghost-disabled" type="button" id="resend" disabled>Resend OTP</button>
+            <p class="hint" id="resend-hint">You can resend a new code in 00:30.</p>
+          </div>
+          <div class="row-between">
+            <button type="button" class="link" id="change-email" style="font-weight:600">Change Email</button>
+            <button type="button" class="link" id="back-reg" style="font-weight:600">Back to registration</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- FORGOT: ENTER EMAIL -->
+      <section class="view" id="view-forgot" aria-labelledby="t-forgot">
+        <div class="head">
+          <h2 id="t-forgot">Forgot your password?</h2>
+          <p>Enter the email linked to your account. We’ll send a 6-digit code to verify it’s you.</p>
+        </div>
+        <form id="forgot-form" novalidate>
+          <div class="field">
+            <label for="f-email">Email</label>
+            <div class="input"><input id="f-email" type="email" placeholder="you@example.com" autocomplete="email" required></div>
+            <p class="error" data-for="f-email">Enter a valid email address.</p>
+          </div>
+          <div class="actions">
+            <button class="btn" type="submit">Send verification code</button>
+            <button type="button" class="back" data-back-login>← Back to Sign In</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- RESET PASSWORD -->
+      <section class="view" id="view-reset" aria-labelledby="t-reset">
+        <div class="head">
+          <h2 id="t-reset">Reset your password</h2>
+          <p>Create a new password for your BarangayDocs civic portal account.</p>
+        </div>
+        <form id="reset-form" novalidate>
+          <div class="fields" style="gap:20px">
+            <div class="field">
+              <label for="n-pw">New password</label>
+              <div class="input">
+                <input id="n-pw" type="password" autocomplete="new-password" required>
+                <button type="button" class="icon-btn" data-toggle="n-pw" aria-label="Show password"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+              <p class="error" data-for="n-pw">Password must have 8+ characters with uppercase, lowercase, a number and a symbol.</p>
+            </div>
+            <div class="field">
+              <label for="n-pw2">Confirm new password</label>
+              <div class="input">
+                <input id="n-pw2" type="password" autocomplete="new-password" required>
+                <button type="button" class="icon-btn" data-toggle="n-pw2" aria-label="Show password"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+              <p class="error" data-for="n-pw2">Passwords don’t match.</p>
+            </div>
+            <div class="reqbox">
+              <b>Your password must include:</b>
+              <span>8 or more characters • uppercase and lowercase letters • a number • a special character</span>
+            </div>
+          </div>
+          <div class="actions" style="gap:16px">
+            <button class="btn" type="submit">Reset Password</button>
+            <button type="button" class="back" data-back-login>← Back to Sign In</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- SUCCESS: registration submitted, waiting for admin approval -->
+      <section class="view center" id="view-done" aria-labelledby="t-done">
+        <div class="check" style="background:#fef3c7"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="head">
+          <h2 id="t-done">Please wait for admin approval</h2>
+          <p>Your email is verified and your registration has been sent to the barangay. Please wait for the barangay admin to approve your registration.</p>
+        </div>
+        <div class="reqbox" style="text-align:left;width:100%">
+          <b>What happens next</b>
+          <span>1. Barangay staff check your valid ID to confirm you are a resident.</span>
+          <span>2. You will be notified by email or SMS once a decision is made (usually 1–2 business days).</span>
+          <span>3. After approval, sign in to request your documents.</span>
+        </div>
+        <div class="actions" style="width:100%">
+          <button class="btn" id="to-login">Back to Sign In</button>
+          <button class="btn secondary" id="to-home">Back to Home</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+<div class="backdrop" id="reset-modal" role="dialog" aria-modal="true" aria-labelledby="t-rs">
+  <div class="modal">
+    <div class="check"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
+    <div class="head" style="gap:8px"><h2 id="t-rs">Password reset successful</h2>
+    <p>Your BarangayDocs account is secure with your new password. You can now sign in to continue managing your document requests.</p></div>
+    <button class="btn" style="width:100%" id="rs-login">Back to Sign In</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+</div>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/landing.js"></script>
+<script src="js/auth-ui.js"></script>
+</body>
+</html>

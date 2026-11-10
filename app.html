@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BarangayDocs – Civic Portal</title>
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/portal.css">
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script>Auth.requireSession(); // not signed in -> back to index.html#login</script>
+</head><body>
+<div id="root"></div>
+<script>
+// The signed-in app is only requested after the server confirms the session (js/portal.js is also refused to anonymous visitors).
+Auth.verify().then(function (ok) {
+  if (!ok) return Auth.expire();
+  var s = document.createElement('script'); s.src = 'js/portal.js'; document.body.appendChild(s);
+});
+</script>
+</body></html>

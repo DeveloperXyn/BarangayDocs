@@ -1,0 +1,20 @@
+{
+  "name": "barangaydocs",
+  "version": "1.1.0",
+  "description": "BarangayDocs civic portal: landing, auth, resident dashboard and admin dashboard",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "db:init": "node scripts/init-db.js",
+    "create-admin": "node scripts/create-admin.js",
+    "test": "node --test test/e2e.test.js test/pg-adapter.test.js test/requests.test.js test/hall.test.js test/documents.test.js",
+    "check": "node --check js/config.js && node --check js/auth.js && node --check js/landing.js && node --check js/auth-ui.js && node --check js/portal.js && node --check server.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}
