@@ -319,3 +319,26 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear{display:non
   .wiz,.guide,.pc{padding:16px}
   nav{padding-left:2px;padding-right:2px}.nl::after{font-size:10px}
 }
+
+/* ---- fixes: profile header/close button + uploaded requirement rows (phone) ---- */
+.pfm{padding-top:0}
+.pfh{position:sticky;top:0;z-index:5;background:var(--card);margin:0 -40px;padding:28px 40px 14px;justify-content:flex-start;border-bottom:1px solid var(--line)}
+.pfh .pfn{flex:1;min-width:0}.pfh h2{overflow-wrap:anywhere}
+.pfh .pfx{position:static;flex:none;margin-left:auto;display:grid;place-items:center}
+.pfm .pfs:first-of-type{border-top:0;padding-top:4px}
+.fl .flm{display:flex;gap:12px;align-items:center;min-width:0;flex:1}
+.fl .fli{color:var(--sky);flex:none;display:grid}
+.fl .flt{min-width:0}.fl .flt b{white-space:nowrap}
+.fl .flt small{overflow-wrap:anywhere;word-break:break-all;line-height:1.4}
+.fl .fla{flex:none}
+@media(max-width:560px){.pfh{margin:0 -24px;padding:22px 24px 12px}}
+@media(max-width:820px){
+  .pfm{padding-top:0}
+  .pfh{margin:0 -18px;padding:20px 18px 12px;gap:12px}
+  .pfh{padding-right:18px}
+  .pfh .pfx{width:40px;height:40px;top:auto;right:auto}
+  .fl{flex-wrap:nowrap;align-items:flex-start;gap:12px}
+  .fl>div:first-child{overflow-wrap:normal}
+  .fl .flm{align-items:flex-start}
+  .fl .flt small{font-size:12px}
+}

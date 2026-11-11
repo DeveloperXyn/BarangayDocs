@@ -393,7 +393,7 @@ function revPg(){
  return back+top+flash()+`<div class="pc" style="flex-direction:row;justify-content:space-between;align-items:center"><div class="kv" style="grid-template-columns:repeat(3,200px);gap:24px">${kv('Tracking number',e(d.trackingNo))}${kv('Document',e(d.documentType))}${kv('Resident',e(d.residentName))}</div>${ab(d.status)}</div>
  <div class="rg"><div class="col"><div class="pc"><h2 class="h">Resident Information</h2><div class="kv">${kv('Full name',e(r.name))}${kv('Unique ID',e(r.citizenId||'—'))}${kv('Email',e(r.email))}${kv('Phone number',e(r.phone||'—'))}${kv('Date of birth',r.dob?fmt(r.dob):'—')}</div></div>
  <div class="pc"><h2 class="h">Application Form</h2>${d.answers.length?`<div class="kv">${d.answers.map(a=>kv(e(a.label),e(a.value))).join('')}</div>`:'<p class="note">This document type has no document-specific form fields.</p>'}</div>
- <div class="pc"><h2 class="h">Uploaded Requirements</h2>${FL2.map(f=>`<div class="fl"><div style="display:flex;gap:12px;align-items:center"><span style="color:var(--sky)">${I('file')}</span><div><b>${e(f.label)}</b><small>${e(f.name)}</small></div></div><div><a href="${e(f.url)}" target="_blank" rel="noopener">View</a></div></div>`).join('')||'<p class="note">No files were uploaded with this request.</p>'}</div>
+ <div class="pc"><h2 class="h">Uploaded Requirements</h2>${FL2.map(f=>`<div class="fl"><div class="flm"><span class="fli">${I('file')}</span><div class="flt"><b>${e(f.label)}</b><small title="${e(f.name)}">${e(shortFn(f.name))}</small></div></div><div class="fla"><a href="${e(f.url)}" target="_blank" rel="noopener">View</a></div></div>`).join('')||'<p class="note">No files were uploaded with this request.</p>'}</div>
  <div class="pc"><h2 class="h">Admin Notes</h2><div><label class="lb">Internal review notes</label><textarea class="in" id="notes" maxlength="1000" style="min-height:80px" oninput="RVW.notes=this.value">${e(RVW.notes)}</textarea></div><p class="note" style="margin-top:-12px">Internal notes are saved with the request; they are never shown to the resident.</p><div><button class="bt" ${RVW.busy?'disabled':''} onclick="saveNotes()">Save notes</button></div>${acts}${RVW.msg?`<p class="er" role="alert">${e(RVW.msg)}</p>`:''}</div></div>
  <div class="col"><div class="pc"><h2 class="h">Document Details</h2><div class="kv one">${kv('Document type',e(d.documentType))}${kv('Purpose',e(d.purpose))}${kv('Submitted',dtm(d.submittedAt))}${d.claimDate?kv('Approved claim date',fmt(d.claimDate)):''}${kv('Resident remarks',e(d.comments||'—'))}${d.residentNote?kv('Message sent to resident',e(d.residentNote)):''}</div></div>
  ${d.status!=='rejected'?`<div class="pc"><h2 class="h">Official Document</h2><p class="note">Generate the official certificate from this resident’s submitted information, preview it, then print. Nothing is printed until you confirm.</p><div><button class="btn sm" ${RVW.busy?'disabled':''} onclick="openDoc()">Generate / Print Document</button></div></div>`:''}
@@ -587,6 +587,8 @@ function closeProf(){PF.open=0;render()}
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&PF.open)closeProf()});
 const dts=iso=>iso?new Date(iso).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—';
 const pkv=(l,v)=>`<div><small>${l}</small><p>${v||'—'}</p></div>`;
+/* shorten very long stored filenames (e.g. IPFS-style hashes) so they stay readable; full name stays in the tooltip */
+function shortFn(n){n=String(n||'');if(n.length<=26)return n;const i=n.lastIndexOf('.'),ext=i>0&&n.length-i<=6?n.slice(i):'';return n.slice(0,12)+'…'+n.slice(-(6+ext.length))}
 function profMd(){
  const d=PF.data,ad=SES.role==='admin',ss=Auth.current()||{};
  const det=PF.err?`<p class="er">${PF.err}</p>`:!d?'<p class="sub">Loading profile…</p>':
@@ -594,8 +596,7 @@ function profMd(){
  <div class="pfs">Account</div><div class="kv">${ad?pkv('Staff ID',e(d.citizenId))+pkv('Role','Barangay Admin')+pkv('Office','Barangay Hall')+pkv('Signed in',dtm(ss.iat?new Date(ss.iat).toISOString():null))
  :pkv('Resident ID',e(d.citizenId))+pkv('Account status',d.status?rbd(d.status):'')+pkv('Member since',dts(d.createdAt))+pkv('Valid ID on file',e(d.idFileName))}</div>`;
  return `<div class="ov" onclick="if(event.target===this)closeProf()"><div class="mod pfm" role="dialog" aria-modal="true" aria-label="My profile">
- <button class="pfx" onclick="closeProf()" aria-label="Close profile">×</button>
- <div class="pfh"><div class="av pfav">${e(initials(SES.name))}</div><div><h2 class="h">${e(SES.name)}</h2><span class="pfr">${ad?'Barangay Admin':'Resident'}</span></div></div>
+ <div class="pfh"><div class="av pfav">${e(initials(SES.name))}</div><div class="pfn"><h2 class="h">${e(SES.name)}</h2><span class="pfr">${ad?'Barangay Admin':'Resident'}</span></div><button class="pfx" onclick="closeProf()" aria-label="Close profile">×</button></div>
  ${det}</div></div>`}
 /* ===================== END MY PROFILE ===================== */
 
