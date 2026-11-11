@@ -257,4 +257,3 @@ Barangay Clearance, Barangay ID and Letter of Residency have no template yet; th
   and are never saved, and every preview/download is written to the audit log. Do not publish this folder (e.g. on a public GitHub repo).
 * The templates were built from the barangay's original Word file with `python3 tools/build_templates.py INDIGENCY_2026.docx`
   (nothing is redrawn; only the sample resident's text became `{{PLACEHOLDERS}}`). You can also open a template in Word to adjust wording, keeping the `{{...}}` tokens.
-# BarangayDocs

@@ -230,3 +230,20 @@ footer{background:var(--navy);padding:64px 80px;display:flex;flex-direction:colu
 /* The page has its own show/hide-password eye, so hide the browser's built-in one (Edge/Chrome) to avoid two icons */
 input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear{display:none}
 input[type="password"]::-webkit-credentials-auto-fill-button{display:none!important}
+
+/* ---- phone polish (screens 820px and below; desktop untouched) ---- */
+@media(max-width:820px){
+  #auth .input input,#landing .tin input{font-size:16px}          /* 16px stops iPhones zooming in when a field is tapped */
+  #auth .input{min-height:50px}#auth .btn{height:50px}
+  #auth select,#auth .input select{font-size:16px}
+}
+@media(max-width:480px){
+  #landing .nav{padding:0 14px;gap:8px}
+  #landing .acts{gap:8px}#landing .acts .b{padding:0 12px;height:42px}
+  #landing .hero{padding:40px 16px}#landing .sec{padding:48px 16px}#landing .track{padding:28px 16px}#landing footer{padding:36px 16px}
+}
+@media(max-width:360px){
+  #landing .nav{padding:0 10px;gap:6px}
+  #landing .brand{gap:7px;min-width:0}#landing .wm b{font-size:15.5px}#landing .wm small{display:none}
+  #landing .acts{gap:6px}#landing .acts .b{padding:0 10px;font-size:13px}
+}

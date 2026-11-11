@@ -21,9 +21,10 @@ ck2:'<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
 x:'<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/>',
 user:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/>'};
 const I=(k,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24">${P[k]}</svg>`;
+const NLS={'Dashboard':'Home','New Request':'New','Request History':'History','All Requests':'Requests','Manage Types':'Types','Announcements':'Notices'};   // short names for the phone tab bar
 const shell=(role,active,nav,body)=>`<div class="app"><aside class="side">
 <div class="logo"><i>${I('award').replace('class="i "','class="i " style="width:20px;height:20px;color:#fff"')}</i><div><b class="h">Barangay<span>Docs</span></b><small>Civic Portal</small></div></div>
-<nav>${nav.map(([k,l,ic])=>`<a href="#/${role}${k?'/'+k:''}" class="${k===active?'on':''}">${I(ic)}${l}${k==='residents'&&pendingCount()?`<span class="nbd">${pendingCount()}</span>`:''}</a>`).join('')}</nav>
+<nav>${nav.map(([k,l,ic])=>`<a href="#/${role}${k?'/'+k:''}" class="${k===active?'on':''}">${I(ic)}<span class="nl" data-s="${e(NLS[l]||l)}">${l}</span>${k==='residents'&&pendingCount()?`<span class="nbd">${pendingCount()}</span>`:''}</a>`).join('')}</nav>
 <div class="acct"><div class="prof" role="button" tabindex="0" title="View my profile" onclick="openProf()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProf()}"><div class="av">${e(initials(SES.name))}</div><div>${e(SES.name)}<small>${SES.role==='admin'?'Barangay Admin':'Resident'}</small></div></div>
 <div class="out" onclick="LO=1;render()">${I('out')}Log out</div></div></aside><main>${body}</main></div>`;
 const isRes=()=>!location.hash.startsWith('#/admin');
@@ -599,6 +600,8 @@ function profMd(){
 /* ===================== END MY PROFILE ===================== */
 
 const AP={residents:resPg,resident:resDetail,requests:reqPg,types:typPg,announce:annPg,reports:repPg,review:revPg};
+/* Phone layout turns table rows into cards; each cell needs its column name. Pure attributes: nothing changes on desktop. */
+function labelCells(){document.querySelectorAll('table').forEach(t=>{const h=[...(t.rows[0]||{cells:[]}).cells].map(c=>c.textContent.trim());[...t.rows].slice(1).forEach(r=>{if(r.cells.length!==h.length)return;[...r.cells].forEach((c,i)=>{c.dataset.label=h[i]})})})}
 function render(){
  // route guard: every user only sees their own area (residents never reach #/admin and vice versa)
  const want=SES.role==='admin'?'admin':'resident';
@@ -615,6 +618,7 @@ function render(){
    if(k)QT=setTimeout(()=>{V[k].page=1;LDR[k]()},300);   // searched on the server, after the typing pause
    else{render();const n=document.getElementById('q');n.focus();n.setSelectionRange(p,p)}};
   if(keep!=null){q.focus();q.setSelectionRange(keep,keep)}}
+ labelCells();
  if(window.scrollY!==sy)window.scrollTo(0,sy);
 }
 addEventListener('hashchange',()=>{if(DOCS.url){URL.revokeObjectURL(DOCS.url);DOCS.url=''}MD=null;aq='';FL='';NS.open=0;RS.msg='';enter()});
