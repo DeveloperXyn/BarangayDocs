@@ -2,7 +2,7 @@
 /* Single source of truth for the document-specific application forms (what the resident fills in, and what the server validates).
    The resident portal renders its forms from GET /document-types, so the browser and the server can never disagree.
    Document types an admin adds later have no document-specific fields: they only use the shared "Application Details" step. */
-const CS = ['Single', 'Married', 'Widowed', 'Separated'], PU = ['Medical', 'Financial', 'Burial'], GN = ['Male', 'Female'];
+const CS = ['Single', 'Married', 'Widowed', 'Separated'], PU = ['Medical', 'Financial', 'Burial'], GN = ['Male', 'Female'], REL = ['Spouse', 'Son', 'Daughter', 'Parent', 'Sibling', 'Grandchild', 'Other Relative', 'Guardian', 'Neighbor / Friend'];
 const F = (key, label, extra) => Object.assign({ key, label, type: 'text', required: true }, extra);
 const NAME = F('full_name', 'Full Name'), AGE = F('age', 'Age', { type: 'number', min: 1, max: 120 });
 const CIVIL = F('civil_status', 'Civil Status', { type: 'select', options: CS }), BIRTH = F('birth_date', 'Birth Date', { type: 'date', max: 'today' });
@@ -21,6 +21,7 @@ const FORMS = {
   'Certificate of Indigency': { fields: [NAME, AGE, CIVIL, ADDR,
     F('representative', 'Representative’s Name', { required: false }),
     F('rep_age', 'Representative’s Age', { type: 'number', min: 1, max: 120, requiredIf: 'representative', help: 'Required when a representative is named.' }),
+    F('rep_relationship', 'Relationship to the Recipient', { type: 'select', options: REL, requiredIf: 'representative', help: 'Required when a representative is named.' }),
     F('reason', 'Reason', { type: 'select', options: PU, isPurpose: true, help: 'Available reasons: Medical, Financial, Burial.' }), VALID_ID('Valid ID of the Recipient'), VALID_ID('Valid ID of the Representative', { key: 'rep_valid_id', requiredIf: 'representative', help: 'Required only when a representative will claim the document. ' + IDHELP })] },
   'Barangay ID': { fields: [F('last_name', 'Last Name'), F('first_name', 'First Name'), F('middle_name', 'Middle Name', { required: false }), ADDR, F('birth_place', 'Birth Place', { wide: true }), BIRTH, F('gender', 'Gender', { type: 'select', options: GN }), F('nationality', 'Nationality'), CIVIL, F('emergency_name', 'Emergency Contact Name'), F('emergency_no', 'Emergency Contact Number', { pattern: '^09\\d{9}$', patternMsg: 'Enter a mobile number like 09XX XXX XXXX.' }), VALID_ID()] },
   'Certificate of Residency': { fields: [NAME, AGE, BIRTH, CIVIL, F('residency_date', 'Residency Date', { type: 'date', max: 'today' }), ADDR, VALID_ID()] },

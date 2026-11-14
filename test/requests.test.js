@@ -111,16 +111,19 @@ describe('BarangayDocs requests, announcements and notifications', () => {
     // Indigency: recipient ID always, representative ID only when a representative is named
     const ind = typeId('Certificate of Indigency'), I = { full_name: 'Maria Santos', age: '31', civil_status: 'Single', address: '1 Mabini St', reason: 'Medical' };
     r = await maria.req('POST', API + '/requests', submitForm(ind, {}, I)); assert.equal(r.status, 422); assert.ok(r.data.fields.valid_id && !r.data.fields.rep_valid_id);
-    r = await maria.req('POST', API + '/requests', submitForm(ind, {}, Object.assign({ representative: 'Pedro Santos', rep_age: '35' }, I), { valid_id: JPG })); assert.equal(r.status, 422); assert.ok(r.data.fields.rep_valid_id && !r.data.fields.valid_id);
-    r = await maria.req('POST', API + '/requests', submitForm(ind, {}, Object.assign({ representative: 'Pedro Santos', rep_age: '35' }, I), { valid_id: JPG, rep_valid_id: JPG })); assert.equal(r.status, 201);
+    r = await maria.req('POST', API + '/requests', submitForm(ind, {}, Object.assign({ representative: 'Pedro Santos', rep_age: '35', rep_relationship: 'Son' }, I), { valid_id: JPG })); assert.equal(r.status, 422); assert.ok(r.data.fields.rep_valid_id && !r.data.fields.valid_id);
+    r = await maria.req('POST', API + '/requests', submitForm(ind, {}, Object.assign({ representative: 'Pedro Santos', rep_age: '35', rep_relationship: 'Son' }, I), { valid_id: JPG, rep_valid_id: JPG })); assert.equal(r.status, 201);
     assert.equal(nRows('SELECT COUNT(*) n FROM request_files WHERE request_id=?', Number(r.data.id)), 2);
     r = await maria.req('POST', API + '/requests', submitForm(ind, {}, I, { valid_id: JPG })); assert.equal(r.status, 201, 'no representative -> no representative ID needed');
     // no age limit on the document forms (registration is the only 18+ gate); the representative's age is required once a representative is named
     const { validate, FORMS } = require('../server/forms'), V = x => validate('Certificate of Indigency', Object.assign({}, I, x), '2026-11-05').errors;
     assert.equal(V({ age: '10' }).age, undefined, 'a young recipient is accepted on the form'); assert.ok(V({ age: '0' }).age, 'but the age must still be a real number');
     assert.ok(V({ representative: 'Pedro Santos' }).rep_age, 'representative age is required once a representative is named');
+    assert.ok(V({ representative: 'Pedro Santos', rep_age: '35' }).rep_relationship, 'relationship is required once a representative is named');
+    assert.equal(V({ representative: 'Pedro Santos', rep_age: '35', rep_relationship: 'Son' }).rep_relationship, undefined);
     assert.equal(V({ representative: 'Pedro Santos', rep_age: '17' }).rep_age, undefined);
     assert.equal(V({ rep_age: '12' }).rep_age, undefined, 'ignored when nobody is representing');
+    assert.equal(V({}).rep_relationship, undefined, 'relationship ignored when nobody is representing');
     assert.ok(Object.values(FORMS).every(f => f.fields.every(x => !x.prefill)), 'no form field is pre-filled');
     assert.ok(FORMS['Certificate of Indigency'].fields.find(x => x.key === 'address').placeholder, 'address shows a Purok example');
     // every remaining built-in type asks for a Valid ID too
