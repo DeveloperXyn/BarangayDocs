@@ -393,7 +393,7 @@ function revPg(){
  return back+top+flash()+`<div class="pc" style="flex-direction:row;justify-content:space-between;align-items:center"><div class="kv" style="grid-template-columns:repeat(3,200px);gap:24px">${kv('Tracking number',e(d.trackingNo))}${kv('Document',e(d.documentType))}${kv('Resident',e(d.residentName))}</div>${ab(d.status)}</div>
  <div class="rg"><div class="col"><div class="pc"><h2 class="h">Resident Information</h2><div class="kv">${kv('Full name',e(r.name))}${kv('Unique ID',e(r.citizenId||'—'))}${kv('Email',e(r.email))}${kv('Phone number',e(r.phone||'—'))}${kv('Date of birth',r.dob?fmt(r.dob):'—')}</div></div>
  <div class="pc"><h2 class="h">Application Form</h2>${d.answers.length?`<div class="kv">${d.answers.map(a=>kv(e(a.label),e(a.value))).join('')}</div>`:'<p class="note">This document type has no document-specific form fields.</p>'}</div>
- <div class="pc"><h2 class="h">Uploaded Requirements</h2>${FL2.map(f=>`<div class="fl"><div class="flm"><span class="fli">${I('file')}</span><div class="flt"><b>${e(f.label)}</b><small title="${e(f.name)}">${e(shortFn(f.name))}</small></div></div><div class="fla"><a href="${e(f.url)}" target="_blank" rel="noopener">View</a></div></div>`).join('')||'<p class="note">No files were uploaded with this request.</p>'}</div>
+ <div class="pc"><h2 class="h">Uploaded Requirements</h2>${FL2.map(f=>`<div class="fl"><div style="display:flex;gap:12px;align-items:center"><span style="color:var(--sky)">${I('file')}</span><div><b>${e(f.label)}</b><small>${e(f.name)}</small></div></div><div><a href="${e(f.url)}" target="_blank" rel="noopener">View</a></div></div>`).join('')||'<p class="note">No files were uploaded with this request.</p>'}</div>
  <div class="pc"><h2 class="h">Admin Notes</h2><div><label class="lb">Internal review notes</label><textarea class="in" id="notes" maxlength="1000" style="min-height:80px" oninput="RVW.notes=this.value">${e(RVW.notes)}</textarea></div><p class="note" style="margin-top:-12px">Internal notes are saved with the request; they are never shown to the resident.</p><div><button class="bt" ${RVW.busy?'disabled':''} onclick="saveNotes()">Save notes</button></div>${acts}${RVW.msg?`<p class="er" role="alert">${e(RVW.msg)}</p>`:''}</div></div>
  <div class="col"><div class="pc"><h2 class="h">Document Details</h2><div class="kv one">${kv('Document type',e(d.documentType))}${kv('Purpose',e(d.purpose))}${kv('Submitted',dtm(d.submittedAt))}${d.claimDate?kv('Approved claim date',fmt(d.claimDate)):''}${kv('Resident remarks',e(d.comments||'—'))}${d.residentNote?kv('Message sent to resident',e(d.residentNote)):''}</div></div>
  ${d.status!=='rejected'?`<div class="pc"><h2 class="h">Official Document</h2><p class="note">Generate the official certificate from this resident’s submitted information, preview it, then print. Nothing is printed until you confirm.</p><div><button class="btn sm" ${RVW.busy?'disabled':''} onclick="openDoc()">Generate / Print Document</button></div></div>`:''}
@@ -511,12 +511,19 @@ function admMd(){const m=MD,t=m.i!=null&&m.k==='type'?ATY.items[m.i]:null,a=m.i!
 /* ===================== RESIDENT APPROVALS (admin) =====================
  Backend: GET /admin/residents  ->  { data:[Resident] }      PATCH /admin/residents/:id  { status:'approved'|'rejected', reason }
  Resident = { id, citizenId, name, email, phone, dob, createdAt, status:'pending'|'approved'|'rejected', note, decidedAt, idFileName, idUrl|idData } */
-const RS={items:[],loaded:0,tab:'Pending',chk:{},msg:'',flash:'',err:''};
+const RS={items:[],loaded:0,tab:'Pending',chk:{},sv:{},msg:'',flash:'',err:''};
+async function ckSave(id){   // saves the checklist ticks right away so they are still there after a refresh or on another device
+ if(CFG.USE_MOCK)return;
+ RS.sv[id]=(RS.sv[id]||0)+1;
+ try{await http('PATCH','/admin/residents/'+encodeURIComponent(id)+'/checks',{checks:RS.chk[id]})}
+ catch(x){RS.msg='Couldn’t save the checklist. Check your connection and tick again.';render()}
+ finally{RS.sv[id]--;if(!RS.sv[id])delete RS.sv[id]}}
 const pendingCount=()=>RS.items.filter(r=>r.status==='pending').length;
 async function loadRes(silent){
  try{
   const items=await Auth.residents.list(),sig=x=>JSON.stringify(x.map(r=>[r.id,r.status]));
   const changed=sig(items)!==sig(RS.items)||!RS.loaded;RS.items=items;RS.err='';RS.loaded=1;
+  items.forEach(r=>{if(Array.isArray(r.checks)&&!RS.sv[r.id])RS.chk[r.id]=r.checks.map(Number)});   // ticks saved on the server (not while a save is still in flight)
   const t=document.activeElement&&document.activeElement.tagName;
   if(!silent||(changed&&!MD&&!PF.open&&t!=='INPUT'&&t!=='TEXTAREA'&&t!=='SELECT'))render();
  }catch(x){RS.err='Couldn’t load resident registrations.';RS.loaded=1;if(!silent)render()}
@@ -557,7 +564,7 @@ function resDetail(){
   <div class="pc"><h2 class="h">Registration Details</h2><div class="kv">${kv('Full name',e(r.name))}${kv('Email',e(r.email))}${kv('Mobile number',phn(r.phone))}${kv('Date of birth',r.dob?fmt(r.dob):'—')}</div><div class="vf">${ok}Email address verified with a one-time code</div></div>
   <div class="pc"><h2 class="h">Valid ID</h2>${prev}<p class="note">${e(r.idFileName||'')} · Check the name, photo, expiry date and address against the details above.</p></div>
  </div><div class="col">
-  <div class="pc"><h2 class="h">Verification Checklist</h2>${CK.map((t,i)=>`<label class="ckr"><input type="checkbox" ${ck[i]?'checked':''} ${pend?'':'disabled'} onchange="RS.chk['${e(id)}'][${i}]=this.checked?1:0;RS.msg='';render()"><span>${t}</span></label>`).join('')}</div>
+  <div class="pc"><h2 class="h">Verification Checklist</h2>${CK.map((t,i)=>`<label class="ckr"><input type="checkbox" ${ck[i]?'checked':''} ${pend?'':'disabled'} onchange="RS.chk['${e(id)}'][${i}]=this.checked?1:0;RS.msg='';ckSave('${e(id)}');render()"><span>${t}</span></label>`).join('')}</div>
   ${pend?`<div class="pc"><h2 class="h">Decision</h2>${RS.msg?`<p class="er">${RS.msg}</p>`:''}<div class="acts" style="margin:0"><button class="bt r" onclick="resAsk('rrj')">Reject</button><button class="btn" onclick="resAsk('rap')" style="opacity:${all?1:.55}">Approve resident</button></div><p class="note">Approving lets this person sign in and request documents. Rejecting sends your reason to the resident.</p></div>
   <div class="gd"><b>Decision guidance</b>Approve only after all four checks are ticked. If the ID is blurry or expired, reject with a clear reason so the resident can register again with a better photo.</div>`:
   `<div class="pc"><h2 class="h">Decision</h2><div class="kv one">${kv('Status',rbd(r.status))}${kv('Decided',dtm(r.decidedAt))}${r.status==='rejected'?kv('Reason sent to resident',e(r.note||'—')):''}</div></div>`}
@@ -587,8 +594,6 @@ function closeProf(){PF.open=0;render()}
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&PF.open)closeProf()});
 const dts=iso=>iso?new Date(iso).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—';
 const pkv=(l,v)=>`<div><small>${l}</small><p>${v||'—'}</p></div>`;
-/* shorten very long stored filenames (e.g. IPFS-style hashes) so they stay readable; full name stays in the tooltip */
-function shortFn(n){n=String(n||'');if(n.length<=26)return n;const i=n.lastIndexOf('.'),ext=i>0&&n.length-i<=6?n.slice(i):'';return n.slice(0,12)+'…'+n.slice(-(6+ext.length))}
 function profMd(){
  const d=PF.data,ad=SES.role==='admin',ss=Auth.current()||{};
  const det=PF.err?`<p class="er">${PF.err}</p>`:!d?'<p class="sub">Loading profile…</p>':
@@ -596,7 +601,8 @@ function profMd(){
  <div class="pfs">Account</div><div class="kv">${ad?pkv('Staff ID',e(d.citizenId))+pkv('Role','Barangay Admin')+pkv('Office','Barangay Hall')+pkv('Signed in',dtm(ss.iat?new Date(ss.iat).toISOString():null))
  :pkv('Resident ID',e(d.citizenId))+pkv('Account status',d.status?rbd(d.status):'')+pkv('Member since',dts(d.createdAt))+pkv('Valid ID on file',e(d.idFileName))}</div>`;
  return `<div class="ov" onclick="if(event.target===this)closeProf()"><div class="mod pfm" role="dialog" aria-modal="true" aria-label="My profile">
- <div class="pfh"><div class="av pfav">${e(initials(SES.name))}</div><div class="pfn"><h2 class="h">${e(SES.name)}</h2><span class="pfr">${ad?'Barangay Admin':'Resident'}</span></div><button class="pfx" onclick="closeProf()" aria-label="Close profile">×</button></div>
+ <button class="pfx" onclick="closeProf()" aria-label="Close profile">×</button>
+ <div class="pfh"><div class="av pfav">${e(initials(SES.name))}</div><div><h2 class="h">${e(SES.name)}</h2><span class="pfr">${ad?'Barangay Admin':'Resident'}</span></div></div>
  ${det}</div></div>`}
 /* ===================== END MY PROFILE ===================== */
 

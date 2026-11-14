@@ -11,7 +11,35 @@ module.exports = function adminRoutes({ config: cfg, db, mailer, log }) {
   /* GET /admin/residents -> every EMAIL-VERIFIED registration (the approval queue + history) */
   async function list() {
     const rows = await db.all("SELECT * FROM users WHERE role='resident' AND email_verified=1 ORDER BY created_at DESC, id DESC");
-    return json(200, { data: rows.map(r => residentDto(r, cfg)) });
+    let saved = {};
+    try { for (const x of await db.all("SELECT name, value FROM settings WHERE name LIKE 'ck:%'")) saved[x.name] = String(x.value); } catch (e) { saved = {}; }
+    return json(200, { data: rows.map(r => Object.assign(residentDto(r, cfg), { checks: checksOf(saved['ck:' + r.id], r) })) });
+  }
+
+  /* The verification checklist (4 ticks) is kept in the existing `settings` table as  ck:<residentId> = "1011|<registration time>".
+     The registration time guards against a stale row after the database was wiped and ids restarted. */
+  const CHECKS = 4;
+  const checksOf = (value, user) => {
+    const m = /^([01]{4})\|(.*)$/.exec(value || '');
+    return m && m[2] === String(user.created_at) ? m[1].split('').map(Number) : [0, 0, 0, 0];
+  };
+
+  /* PATCH /admin/residents/:id/checks  { checks:[0|1 x4] }  (only while the registration is still pending) */
+  async function saveChecks(ctx) {
+    const id = parseInt(ctx.params.id, 10), arr = (ctx.body || {}).checks;
+    if (!Number.isSafeInteger(id) || id < 1) throw new HttpError(404, 'not_found', 'Registration not found.');
+    if (!Array.isArray(arr) || arr.length !== CHECKS) throw new HttpError(422, 'validation_failed', 'Send the four checklist values.');
+    const bits = arr.map(v => (v === 1 || v === true || v === '1' ? 1 : 0)).join('');
+    const u = await db.get("SELECT id, account_status, created_at FROM users WHERE id=? AND role='resident'", [id]);
+    if (!u) throw new HttpError(404, 'not_found', 'Registration not found.');
+    if (u.account_status !== 'pending') throw new HttpError(409, 'invalid_state', 'This registration was already ' + u.account_status + '.');
+    const name = 'ck:' + id, value = bits + '|' + String(u.created_at), now = ts();
+    const r = await db.run('UPDATE settings SET value=?, updated_at=? WHERE name=?', [value, now, name]);
+    if (!r.affectedRows) {
+      try { await db.run('INSERT INTO settings (name, value, updated_at) VALUES (?,?,?)', [name, value, now]); }
+      catch (e) { await db.run('UPDATE settings SET value=?, updated_at=? WHERE name=?', [value, now, name]); }   // two ticks at once: the row now exists
+    }
+    return json(200, { checks: bits.split('').map(Number) });
   }
 
   /* PATCH /admin/residents/:id  { status:'approved'|'rejected', reason? } */
@@ -65,6 +93,7 @@ module.exports = function adminRoutes({ config: cfg, db, mailer, log }) {
   return [
     { method: 'GET', path: '/admin/residents', auth: 'admin', handler: list },
     { method: 'PATCH', path: '/admin/residents/:id', auth: 'admin', handler: decide },
+    { method: 'PATCH', path: '/admin/residents/:id/checks', auth: 'admin', handler: saveChecks },
     { method: 'GET', path: '/admin/residents/:id/id-file', auth: 'admin', handler: idFile }
   ];
 };
