@@ -155,7 +155,7 @@ const pager=(S,k)=>{const a=S.total?(S.page-1)*S.limit+1:0,b=Math.min(S.total,S.
 const RV={loaded:0,err:'',items:[],counts:{},status:'',limit:5,page:1,pages:1,total:0};
 const RH={loaded:0,err:'',items:[],total:0,pages:1,page:1,limit:10,type:'',status:'',range:'',types:[]};
 const TR={loaded:0,err:'',data:null};
-const DTS={loaded:0,err:'',items:[],purposes:[],guide:[]};
+const DTS={loaded:0,err:'',items:[],guide:[]};
 const AD={loaded:0,err:'',items:[],stats:null,type:'',range:'',types:[],limit:10,page:1,pages:1,total:0};
 const AQ={loaded:0,err:'',items:[],total:0,pages:1,page:1,limit:10,type:'',status:'',range:'',types:[]};
 const RVW={loaded:0,err:'',id:'',data:null,notes:'',chk:[0,0,0,0],busy:0,msg:''};
@@ -193,7 +193,7 @@ async function loadTrack(silent){
 }
 async function loadTypes(silent){
  if(!PRO)Auth.profile().then(p=>{PRO=p}).catch(()=>{});
- await load(DTS,'resident/new',async()=>{const r=await http('GET','/document-types');DTS.items=r.data;DTS.purposes=r.purposes;DTS.guide=r.guide;
+ await load(DTS,'resident/new',async()=>{const r=await http('GET','/document-types');DTS.items=r.data;DTS.guide=r.guide;
   if(NR.t!=null&&!DTS.items.some(t=>t.id===NR.t)){NR.t=null;NR.step=1}},silent);
 }
 async function loadADash(silent){
@@ -272,7 +272,7 @@ function trackPg(){
  if(d.status!=='completed'&&d.status!=='rejected')T.push(['Completed',d.status==='ready'?'Pending pickup':'—',0]);
  const note={pending:'Your request is waiting for review by barangay staff.',processing:'Your request is being processed.',ready:'Your document is ready. Please bring one valid government-issued ID to the Express desk window to claim.',completed:'This document has been claimed. Thank you.',rejected:'Your request was not approved.'}[d.status];
  return h+`<div><a class="bk" onclick="location.hash='#/resident/history'">← Back to Request History</a></div><div class="lay"><div class="wiz"><h2 class="h">${e(d.trackingNo)}</h2><span>${bd(d.status)}</span><h3 class="h" style="font-size:16px">Live Timeline Track</h3><div class="trkl">${T.map(x=>`<div class="nt tkr"><i class="dot" style="background:${x[2]?'var(--teal)':'var(--line)'}"></i><div style="min-width:0;overflow-wrap:anywhere"><b>${e(x[0])}</b><small>${e(x[1])}</small>${x[3]?`<p>${e(x[3])}</p>`:''}</div></div>`).join('')}</div>${infoBox(d)}</div>
- <aside class="guide"><div><b>Document Requested</b><p>${e(d.documentType)}</p></div><div><b>Purpose</b><p>${e(d.purpose)}</p></div><div><b>Date Submitted</b><p>${dtm(d.submittedAt)}</p></div>${d.claimDate&&d.status!=='rejected'?`<div><b>Claim Date</b><p>${fmt(d.claimDate)}</p></div>`:''}<div><b>Remarks / Status Note</b><p>${e(d.status==='rejected'&&d.residentNote?'Reason: '+d.residentNote:(d.residentNote||note))}</p></div></aside></div>`;
+ <aside class="guide"><div><b>Document Requested</b><p>${e(d.documentType)}</p></div>${d.purpose?`<div><b>Purpose</b><p>${e(d.purpose)}</p></div>`:''}<div><b>Date Submitted</b><p>${dtm(d.submittedAt)}</p></div>${d.claimDate&&d.status!=='rejected'?`<div><b>Claim Date</b><p>${fmt(d.claimDate)}</p></div>`:''}<div><b>Remarks / Status Note</b><p>${e(d.status==='rejected'&&d.residentNote?'Reason: '+d.residentNote:(d.residentNote||note))}</p></div></aside></div>`;
 }
 
 function infoBox(d){
@@ -285,8 +285,8 @@ function infoBox(d){
  ${TRI.err?`<p class="er" role="alert">${e(TRI.err)}</p>`:''}<div><button class="btn p" ${TRI.busy?'disabled':''} onclick="sendInfo()">${TRI.busy?'Sending…':'Send information'}</button></div></div>`}
 /* ---- new request wizard (forms come from the server so they always match what is validated) ---- */
 const rnd=()=>(window.crypto&&crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2)).replace(/[^A-Za-z0-9_-]/g,'');
-const NR={step:1,t:null,F:{},D:{p:'',c:''},files:{},fpe:{},open:0,err:'',fe:{},busy:0,done:null,token:rnd()};
-const rst=()=>Object.assign(NR,{step:1,t:null,F:{},D:{p:'',c:''},files:{},fpe:{},open:0,err:'',fe:{},busy:0,done:null,token:rnd()});
+const NR={step:1,t:null,F:{},D:{c:''},files:{},fpe:{},open:0,err:'',fe:{},busy:0,done:null,token:rnd()};
+const rst=()=>Object.assign(NR,{step:1,t:null,F:{},D:{c:''},files:{},fpe:{},open:0,err:'',fe:{},busy:0,done:null,token:rnd()});
 const curT=()=>DTS.items.find(t=>t.id===NR.t)||null;
 const pFld=t=>t&&t.fields.find(f=>f.isPurpose)||null;   // a form that already asks for the purpose / reason: don't ask again in the shared step
 const ageOf=d=>{if(!d)return'';const b=new Date(d+'T00:00'),n=new Date();let a=n.getFullYear()-b.getFullYear();if(n<new Date(n.getFullYear(),b.getMonth(),b.getDate()))a--;return a>0&&a<121?String(a):''};
@@ -307,20 +307,20 @@ function fixF(el,k){NR.F[k]=el.value;if(NR.fe[k]){delete NR.fe[k];el.style.borde
 function stepErr(s,t){
  if(s===1)return t?{}:{_:'Please select a document type.'};
  if(s===2)return check2(t);
- if(s===3){const fe={};if(!pFld(t)&&!NR.D.p)fe.purpose='Choose a purpose of request.';return fe}
+ if(s===3)return {}
  return{}}
 function go(n){NR.err='';const t=curT();
  if(n>NR.step){   // never skip ahead: every step in between must be complete first
   for(let s=NR.step;s<n;s++){const fe=stepErr(s,t);if(!Object.keys(fe).length)continue;
    NR.step=s;NR.fe=fe;
-   const names=Object.keys(fe).filter(k=>k!=='_').map(k=>k==='purpose'?'Purpose of Request':((t.fields.find(f=>f.key===k)||{}).label||k));
+   const names=Object.keys(fe).filter(k=>k!=='_').map(k=>((t.fields.find(f=>f.key===k)||{}).label||k));
    NR.err=fe._||('Please complete: '+names.join(', ')+'.');
    render();setTimeout(()=>{const el=document.querySelector('.in[style*="dc2626"]')||document.querySelector('.er');if(el){el.scrollIntoView({block:'center',behavior:'smooth'});try{el.focus({preventScroll:true})}catch(x){}}},40);return}}
  NR.fe={};NR.step=n;render()}
 async function submit(){
  const t=curT();if(NR.busy||!t)return;NR.err='';NR.busy=1;render();
- const fd=new FormData();fd.append('document_type_id',t.id);if(!pFld(t))fd.append('purpose',NR.D.p);fd.append('comments',NR.D.c);fd.append('client_token',NR.token);fd.append('answers',JSON.stringify(NR.F));t.fields.forEach(f=>{if(f.type==='file'&&NR.files[f.key])fd.append(f.key,NR.files[f.key],NR.files[f.key].name)});
- try{const r=await http('POST','/requests',fd);NR.done={id:r.trackingNo,t:t.name,p:pFld(t)?NR.F[pFld(t).key]:NR.D.p,c:NR.D.c};loadNotifs(1);RV.loaded=0;RH.loaded=0}
+ const fd=new FormData();fd.append('document_type_id',t.id);fd.append('comments',NR.D.c);fd.append('client_token',NR.token);fd.append('answers',JSON.stringify(NR.F));t.fields.forEach(f=>{if(f.type==='file'&&NR.files[f.key])fd.append(f.key,NR.files[f.key],NR.files[f.key].name)});
+ try{const r=await http('POST','/requests',fd);NR.done={id:r.trackingNo,t:t.name,c:NR.D.c};loadNotifs(1);RV.loaded=0;RH.loaded=0}
  catch(x){NR.err=emsg(x,'We couldn’t submit your request. Please try again.');if(x.fields){NR.fe=x.fields;const ks=t.fields.map(f=>f.key);if(Object.keys(x.fields).some(k=>ks.includes(k)))NR.step=2;else if(x.fields.purpose)NR.step=3;else NR.step=1}}
  NR.busy=0;render();
 }
@@ -333,6 +333,7 @@ function newReq(){
  const inp=f=>{const k=f.key,v=NR.F[k]==null?'':NR.F[k],lb=`<label class="lb">${e(f.label)}${f.required===false&&!f.requiredIf?' (optional)':''}</label>`;let c;
   if(f.type==='file'){const fl=NR.files[k],opt=!fileNeeded(f,NR.F);c=`<label class="in" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;${NR.fe[k]||NR.fpe[k]?'border-color:#dc2626':''}"><span>${fl?e(fl.name)+' · '+Math.max(1,Math.round(fl.size/1024))+' KB':'<span style="color:var(--faint)">No file chosen</span>'}</span><b class="bt" style="padding:4px 14px;font-size:13px">Browse</b><input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" style="display:none" onchange="pickFile(this,'${e(k)}')"></label>`}
   else if(f.type==='select')c=`<select class="in"${bad(k)} onchange="fixF(this,'${e(k)}')"><option value="">Select…</option>${f.options.map(x=>`<option ${x===v?'selected':''}>${e(x)}</option>`).join('')}</select>`;
+  else if(f.type==='number'||f.numeric)c=`<input class="in"${bad(k)} type="text" inputmode="numeric" autocomplete="off" maxlength="${f.type==='number'?3:f.numeric}" value="${e(v)}" ${f.placeholder?`placeholder="${e(f.placeholder)}"`:''} oninput="this.value=this.value.replace(/\\D/g,'');fixF(this,'${e(k)}')">`;
   else c=`<input class="in"${bad(k)} type="${f.type==='number'?'number':f.type==='date'?'date':'text'}" ${f.type==='date'&&f.max==='today'?`max="${todayStr()}"`:''} ${f.type==='number'?`min="${f.min==null?0:f.min}" max="${f.max||999}"`:''} maxlength="${f.max&&f.type==='text'?f.max:200}" value="${e(v)}" ${f.placeholder?`placeholder="${e(f.placeholder)}"`:''} oninput="fixF(this,'${e(k)}')">`;
   return`<div class="${f.wide?'w':''}">${lb}${c}${f.help?`<p class="sub" style="font-size:12px;margin-top:6px">${e(f.help)}</p>`:''}${er(k)}</div>`};
  const bn=x=>x?`<div class="sum"><b>${e(x[0])}</b><br>${e(x[1])}</div>`:'';
@@ -344,18 +345,18 @@ function newReq(){
  <div class="acts"><button class="bt" onclick="go(1)">Back to selection</button><button class="btn p" onclick="go(3)">Application Details</button></div>`}
  if(n===3){cr=`Document Application · 3 / 4 · ${e(t.name)} → Application Details → Review`;g.unshift(['Shared Application Details','This step applies to every document type. Your selected document, document-specific fields and uploaded file stay attached when you continue or go back.']);
   b=`<h2 class="h">Application Details</h2><div class="sum"><b>Selected document: ${e(t.name)}</b><br>${e(nm)} · All information from your dedicated form is preserved.</div>
- ${pFld(t)?'':`<div><label class="lb">Purpose of Request</label><select class="in"${bad('purpose')} onchange="NR.D.p=this.value"><option value="">Select…</option>${DTS.purposes.map(x=>`<option ${x===NR.D.p?'selected':''}>${e(x)}</option>`).join('')}</select>${er('purpose')}</div>`}
+ 
  <div><label class="lb">Additional Comments (optional)</label><textarea class="in" maxlength="500" oninput="NR.D.c=this.value">${e(NR.D.c)}</textarea></div>
  <div class="acts"><button class="bt" onclick="go(2)">Back</button><button class="btn p" onclick="go(4)">Review</button></div>`}
  if(n===4){cr=`Document Application · 4 / 4 · ${e(t.name)} · Review → Submit → Confirmation`;g.unshift(['Before You Submit','Review your information carefully. Use Edit to correct either your form or application details. Submission sends this request to barangay staff for review.']);
   const rows=t.fields.map(f=>f.type==='file'?`<span>${e(f.label)}</span><b>${NR.files[f.key]?e(NR.files[f.key].name):'—'}</b>`:`<span>${e(f.label)}</span><b>${e(NR.F[f.key]||'—')}</b>`).join('');
   b=`<h2 class="h">Review your Application</h2><p class="sub">${e(t.name)} · ${e(nm)}</p>
  ${t.fields.length?`<div class="sum"><div style="display:flex;justify-content:space-between"><b>Document-specific Form</b><a style="color:var(--sky);font-weight:600;cursor:pointer" onclick="go(2)">Edit</a></div><div class="rv" style="margin-top:12px">${rows}</div></div>`:''}
- <div class="sum"><div style="display:flex;justify-content:space-between"><b>Application details</b><a style="color:var(--sky);font-weight:600;cursor:pointer" onclick="go(3)">Edit</a></div><div class="rv" style="margin-top:12px">${pFld(t)?'':`<span>Purpose of Request</span><b>${e(NR.D.p)}</b>`}<span>Additional Comments</span><b>${e(NR.D.c||'—')}</b></div></div>
+ <div class="sum"><div style="display:flex;justify-content:space-between"><b>Application details</b><a style="color:var(--sky);font-weight:600;cursor:pointer" onclick="go(3)">Edit</a></div><div class="rv" style="margin-top:12px"><span>Additional Comments</span><b>${e(NR.D.c||'—')}</b></div></div>
  <p class="sub" style="font-size:12px">By submitting, I confirm that the information provided is true and accurate.</p>
  <div class="acts"><button class="bt" onclick="go(3)" ${NR.busy?'disabled':''}>Back</button><button class="btn p" onclick="submit()" ${NR.busy?'disabled':''}>${NR.busy?'Submitting…':'Submit Request'}</button></div>`}
  const stp=`<div class="steps">${['Select','Form','Details','Review'].map((l,i)=>`<div class="${i<n?'on':''}"><s></s>${i+1}. ${l}</div>`).join('')}</div>`;
- if(NR.done){cr=`Document Application · Complete · ${e(NR.done.t)} → Confirmation`;g=DTS.guide;b=`<h2 class="h">Request Details</h2><div class="rv"><span>Selected Document Type</span><b>${e(NR.done.t)}</b><span>Purpose of Request</span><b>${e(NR.done.p)}</b><span>Additional Comments</span><b>${e(NR.done.c||'—')}</b></div>`}
+ if(NR.done){cr=`Document Application · Complete · ${e(NR.done.t)} → Confirmation`;g=DTS.guide;b=`<h2 class="h">Request Details</h2><div class="rv"><span>Selected Document Type</span><b>${e(NR.done.t)}</b><span>Additional Comments</span><b>${e(NR.done.c||'—')}</b></div>`}
  return hdr('Apply for Document','File official civic document requests securely. Standard turnaround is 1-2 business days.')+(cr?`<div class="crumb">${cr}</div>`:'')+`<div class="lay"><div class="wiz">${NR.done?'':stp}${b}${NR.err?`<p class="er" role="alert">${e(NR.err)}</p>`:''}</div><aside class="guide"><h3 class="h">Requirements Guide</h3>${g.map(x=>`<div><b>${e(x[0])}</b><p>${e(x[1])}</p></div>`).join('')}</aside></div>`}
 const modal=()=>`<div class="ov"><div class="mod"><div class="ck"><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div><h2 class="h">Your request is now in review</h2><p>Barangay staff will verify your details within one business day. We’ll notify you here whenever your status changes.</p><div class="trk"><div>TRACKING ID<u>${e(NR.done.id)}</u></div><span>Document Type · ${e(NR.done.t)}</span><span>Save this ID. Your next step is to wait for verification; no visit to Barangay Hall is needed yet.</span><span>Visit only after receiving a Ready for Claim notification, and bring your valid ID.</span></div><div class="acts"><button class="bt" onclick="rst();location.hash='#/resident'">Return to dashboard</button><button class="btn p" onclick="const i=NR.done.id;rst();location.hash='#/resident/track/'+encodeURIComponent(i)">Track request</button></div></div></div>`;
 const lo=()=>`<div class="ov"><div class="mod"><h2 class="h" style="font-size:22px">Log out of BarangayDocs?</h2><p>You’ll need to sign in again to view requests and notifications.</p><div class="acts"><button class="bt" onclick="LO=0;render()">Stay signed in</button><button class="btn p" onclick="Auth.logout()">Log out</button></div></div></div>`;
@@ -388,7 +389,7 @@ function revPg(){
  if(!RVW.loaded)return back+top+'<div class="stub">Loading request…</div>';
  if(RVW.err||!d)return back+top+`<div class="stub"><b class="h">${e(RVW.err||'Request not found.')}</b></div>`;
  const kv=(l,v)=>`<div><small>${l}</small><p>${v}</p></div>`,ok=I('ck2'),al=d.allowed,r=d.resident,FL2=d.files;
- const all=RVW.chk.every(Boolean),can=a=>al.includes(a),ck=['Resident information matches record','Valid ID checked','Uploaded requirements reviewed','Purpose and document details checked'];
+ const all=RVW.chk.every(Boolean),can=a=>al.includes(a),ck=['Resident information matches record','Valid ID checked','Uploaded requirements reviewed','Document details checked'];
  const startBtn=can('start')?`<button class="btn sm" ${RVW.busy?'disabled':''} onclick="quick('start')">Start Processing</button>`:'';
  const lowBtns=`${can('approve')?`<button class="btn sm" onclick="needChk()?0:(MD={k:'ap'},render())">Continue to Approve</button>`:''}${can('reject')?`<button class="bt r" onclick="MD={k:'rj'};render()">Reject</button>`:''}${can('info')?`<button class="bt" onclick="MD={k:'info'};render()">Request Additional Information</button>`:''}${can('complete')?`<button class="btn sm" ${RVW.busy?'disabled':''} onclick="quick('complete')">Mark as Claimed</button>`:''}`,hr='<div style="border-top:1px solid var(--line)"></div>';
  const acts=al.length?(lowBtns?hr+`<div style="display:flex;gap:12px;flex-wrap:wrap">${lowBtns}</div>`:''):hr+`<p class="note">This request is ${e(STL[d.status])}. No further status changes are available.</p><div><button class="bt" ${RVW.busy?'disabled':''} onclick="saveNotes()">Save notes</button></div>`;
@@ -397,7 +398,7 @@ function revPg(){
  <div class="pc"><h2 class="h">Application Form</h2>${d.answers.length?`<div class="kv">${d.answers.map(a=>kv(e(a.label),e(a.value))).join('')}</div>`:'<p class="note">This document type has no document-specific form fields.</p>'}</div>
  <div class="pc"><h2 class="h">Uploaded Requirements</h2>${FL2.map(f=>`<div class="fl"><div style="display:flex;gap:12px;align-items:center"><span style="color:var(--sky)">${I('file')}</span><div><b>${e(f.label)}</b><small>${e(f.name)}</small></div></div><div><a href="${e(f.url)}" target="_blank" rel="noopener">View</a></div></div>`).join('')||'<p class="note">No files were uploaded with this request.</p>'}</div>
  <div class="pc"><div class="hd2"><h2 class="h">Request Status</h2><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">${ab(d.status)}${startBtn}</div></div>${hr}<h2 class="h" style="font-size:16px">Admin Notes</h2><textarea class="in" id="notes" maxlength="1000" aria-label="Internal review notes (never shown to the resident)" placeholder="Add internal review notes..." style="min-height:80px" oninput="RVW.notes=this.value">${e(RVW.notes)}</textarea>${acts}${RVW.msg?`<p class="er" role="alert">${e(RVW.msg)}</p>`:''}</div></div>
- <div class="col"><div class="pc"><h2 class="h">Document Details</h2><div class="kv one">${kv('Document type',e(d.documentType))}${kv('Purpose',e(d.purpose))}${kv('Submitted',dtm(d.submittedAt))}${d.claimDate?kv('Approved claim date',fmt(d.claimDate)):''}${kv('Resident remarks',e(d.comments||'—'))}${d.residentNote?kv('Message sent to resident',e(d.residentNote)):''}</div></div>
+ <div class="col"><div class="pc"><h2 class="h">Document Details</h2><div class="kv one">${kv('Document type',e(d.documentType))}${d.purpose?kv('Purpose',e(d.purpose)):''}${kv('Submitted',dtm(d.submittedAt))}${d.claimDate?kv('Approved claim date',fmt(d.claimDate)):''}${kv('Resident remarks',e(d.comments||'—'))}${d.residentNote?kv('Message sent to resident',e(d.residentNote)):''}</div></div>
  ${d.status!=='rejected'?`<div class="pc"><h2 class="h">Official Document</h2><p class="note">Generate the official certificate from this resident’s submitted information, preview it, then print. Nothing is printed until you confirm.</p><div><button class="btn sm" ${RVW.busy?'disabled':''} onclick="openDoc()">Generate / Print Document</button></div></div>`:''}
  ${can('approve')?`<div class="pc"><h2 class="h">Verification Checklist</h2>${ck.map((c,i)=>`<label class="vf" style="cursor:pointer"><input type="checkbox" ${RVW.chk[i]?'checked':''} onchange="RVW.chk[${i}]=this.checked?1:0;render()" style="margin-right:8px">${c}</label>`).join('')}${all?'':'<p class="note">Tick every check to continue to approval.</p>'}</div>`:''}
  <div class="pc"><h2 class="h">Request History</h2>${tlist(d.history.slice().reverse().map(h=>({ev:h.event,head:hdl(h),note:hnote(h),at:h.at})))}</div>

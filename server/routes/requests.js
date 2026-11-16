@@ -13,7 +13,7 @@ module.exports = function requestRoutes({ config: cfg, db, limiter }) {
 
   async function types() {
     const rows = await db.all('SELECT * FROM document_types WHERE active=1 ORDER BY id');
-    return json(200, { data: rows.map(typeDto), purposes: forms.PURPOSES, guide: forms.GUIDE });
+    return json(200, { data: rows.map(typeDto), guide: forms.GUIDE });
   }
 
   async function submit(ctx) {
@@ -29,8 +29,7 @@ module.exports = function requestRoutes({ config: cfg, db, limiter }) {
     const type = /^\d+$/.test(String(f.document_type_id || '')) ? await db.get('SELECT * FROM document_types WHERE id=? AND active=1', [parseInt(f.document_type_id, 10)]) : null;
     if (!type) throw new HttpError(422, 'validation_failed', 'Select an available document type.', { fields: { document_type: 'Select an available document type.' } });
     const comments = cleanText(f.comments, 500, true), pf = forms.purposeField(type.name);
-    let purpose = cleanText(f.purpose, 80);
-    if (!pf && !forms.PURPOSES.includes(purpose)) errors.purpose = 'Choose a purpose of request.';   // forms that already ask for a purpose are not asked twice
+    let purpose = '';   // no shared "Purpose of Request" any more; only forms with their own Purpose / Reason field record one
     let raw = {}; try { raw = JSON.parse(f.answers || '{}'); } catch (e) { errors.answers = 'Malformed form data.'; }
     const v = forms.validate(type.name, raw, ts(new Date(Date.now() + 14 * 3600e3)).slice(0, 10));
     Object.assign(errors, v.errors);

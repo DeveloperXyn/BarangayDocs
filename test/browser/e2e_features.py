@@ -16,7 +16,7 @@ def login(ctx,email):
     pg.goto(BASE+'/index.html#login'); pg.fill('#l-id',email); pg.fill('#l-pw','Str0ng!Pass'); pg.click('#login-btn')
     pg.wait_for_selector('.side',timeout=15000); return pg
 JPG=b'\xff\xd8\xff\xe0'+b'0'*200+b'\xff\xd9'
-SUBMIT="""async(a)=>{const fd=new FormData();fd.append('document_type_id',a.tid);fd.append('purpose','Employment');fd.append('client_token',a.tok);
+SUBMIT="""async(a)=>{const fd=new FormData();fd.append('document_type_id',a.tid);fd.append('client_token',a.tok);
  fd.append('answers',JSON.stringify({last_name:'Santos',first_name:'Maria',address:'1 Mabini Street',birth_place:'Quezon City',birth_date:'1995-06-12',gender:'Female',nationality:'Filipino',civil_status:'Single',emergency_name:'Pedro',emergency_no:'09170000000'}));
  fd.append('valid_id',new Blob([new Uint8Array([255,216,255,224,0,0,0,0,0,0])],{type:'image/jpeg'}),'id.jpg');return await http('POST','/requests',fd)}"""
 LONG="Long notice. "+("Please read this carefully. "*40)+"\n\n"+("ABCDEFGHIJKLMNOPQRSTUVWXYZ"*8)+"\n\nEND-OF-MESSAGE-MARKER"
@@ -55,7 +55,7 @@ with sync_playwright() as p:
     # ---------- rejected request: Reason: (resident) / Rejected: reason (admin, public) ----------
     tid=M.evaluate("async()=>(await http('GET','/document-types')).data.find(t=>t.name==='Barangay ID').id")
     req=M.evaluate(SUBMIT,{'tid':tid,'tok':'tok-reject-'+str(abs(hash(BASE)))[:8]}); code=req['trackingNo']; rid=req['id']
-    check('Barangay ID needs no second purpose and no preferred date', req['purpose']=='Employment' and 'preferredClaimDate' not in req)
+    check('Barangay ID needs no purpose and no preferred date', not req['purpose'] and 'preferredClaimDate' not in req)
     A.evaluate("async(i)=>{await http('PATCH','/admin/requests/'+i,{action:'info',message:'Please upload a clearer ID.'});await http('PATCH','/admin/requests/'+i,{action:'reject',reason:'ID photo is unreadable.',notes:'INTERNAL-ONLY-NOTE'})}",rid)
     M.goto(BASE+'/app.html#/resident/track/'+code); M.evaluate("loadTrack(1)"); M.wait_for_selector('.wiz .b:has-text("Rejected")'); t=M.inner_text('main')
     check('resident: Remarks box starts with "Reason:"','Reason: ID photo is unreadable.' in t)

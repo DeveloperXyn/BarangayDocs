@@ -2,7 +2,7 @@
 /* Single source of truth for the document-specific application forms (what the resident fills in, and what the server validates).
    The resident portal renders its forms from GET /document-types, so the browser and the server can never disagree.
    Document types an admin adds later have no document-specific fields: they only use the shared "Application Details" step. */
-const CS = ['Single', 'Married', 'Widowed', 'Separated'], PU = ['Medical', 'Financial', 'Burial'], GN = ['Male', 'Female'], REL = ['Spouse', 'Son', 'Daughter', 'Parent', 'Sibling', 'Grandchild', 'Other Relative', 'Guardian', 'Neighbor / Friend'];
+const CS = ['Single', 'Married', 'Widowed', 'Separated'], PU = ['Medical', 'Financial', 'Burial'], GN = ['Male', 'Female'], REL = ['Spouse', 'Parent', 'Son', 'Daughter', 'Sibling', 'Grandchild', 'Guardian', 'Neighbor / Friend', 'Other Relative'];
 const F = (key, label, extra) => Object.assign({ key, label, type: 'text', required: true }, extra);
 const NAME = F('full_name', 'Full Name'), AGE = F('age', 'Age', { type: 'number', min: 1, max: 120 });
 const CIVIL = F('civil_status', 'Civil Status', { type: 'select', options: CS }), BIRTH = F('birth_date', 'Birth Date', { type: 'date', max: 'today' });
@@ -13,7 +13,7 @@ const VALID_ID = (label = 'Valid ID', extra) => F('valid_id', label, Object.assi
 const FORMS = {
   'Barangay Certification': { fields: [NAME, F('nationality', 'Nationality'), CIVIL, F('cert_purpose', 'Purpose', { type: 'select', options: PU, isPurpose: true, help: 'Available purposes: Medical, Financial, Burial.' }), AGE, F('years_residency', 'Years of Residency', { type: 'number', min: 0, max: 120 }), ADDR, VALID_ID()] },
   'Barangay Clearance': {
-    fields: [NAME, AGE, CIVIL, BIRTH, ADDR, F('gender', 'Gender', { type: 'select', options: GN }), F('cedula_no', 'Cedula Number', { max: 40 }), F('cedula_date', 'Cedula Issue Date', { type: 'date', max: 'today' }), F('cedula_place', 'Cedula Place of Issue'),
+    fields: [NAME, AGE, CIVIL, BIRTH, ADDR, F('gender', 'Gender', { type: 'select', options: GN }), F('cedula_no', 'Cedula Number', { max: 40, numeric: 40, pattern: '^\\d+$', patternMsg: 'Enter numbers only.' }), F('cedula_date', 'Cedula Issue Date', { type: 'date', max: 'today' }), F('cedula_place', 'Cedula Place of Issue'),
       F('cedula_file', 'Cedula Upload', { type: 'file', wide: true, help: IDHELP }), VALID_ID()],
     banner: ['Cedula Required', 'A current Cedula is required for Barangay Clearance. Complete all Cedula details and upload a readable copy of your Cedula and a valid ID before continuing.'],
     guide: [['Cedula Required', 'Provide your current Cedula number, issue date, place of issue and a clear uploaded copy.']]
@@ -23,7 +23,7 @@ const FORMS = {
     F('rep_age', 'Representative’s Age', { type: 'number', min: 1, max: 120, requiredIf: 'representative', help: 'Required when a representative is named.' }),
     F('rep_relationship', 'Relationship to the Recipient', { type: 'select', options: REL, requiredIf: 'representative', help: 'Required when a representative is named.' }),
     F('reason', 'Reason', { type: 'select', options: PU, isPurpose: true, help: 'Available reasons: Medical, Financial, Burial.' }), VALID_ID('Valid ID of the Recipient'), VALID_ID('Valid ID of the Representative', { key: 'rep_valid_id', requiredIf: 'representative', help: 'Required only when a representative will claim the document. ' + IDHELP })] },
-  'Barangay ID': { fields: [F('last_name', 'Last Name'), F('first_name', 'First Name'), F('middle_name', 'Middle Name', { required: false }), ADDR, F('birth_place', 'Birth Place', { wide: true }), BIRTH, F('gender', 'Gender', { type: 'select', options: GN }), F('nationality', 'Nationality'), CIVIL, F('emergency_name', 'Emergency Contact Name'), F('emergency_no', 'Emergency Contact Number', { pattern: '^09\\d{9}$', patternMsg: 'Enter a mobile number like 09XX XXX XXXX.' }), VALID_ID()] },
+  'Barangay ID': { fields: [F('last_name', 'Last Name'), F('first_name', 'First Name'), F('middle_name', 'Middle Name', { required: false }), ADDR, F('birth_place', 'Birth Place', { wide: true }), BIRTH, F('gender', 'Gender', { type: 'select', options: GN }), F('nationality', 'Nationality'), CIVIL, F('emergency_name', 'Emergency Contact Name'), F('emergency_no', 'Emergency Contact Number', { numeric: 11, placeholder: '09XXXXXXXXX', pattern: '^09\\d{9}$', patternMsg: 'Enter an 11-digit mobile number starting with 09, numbers only.' }), VALID_ID()] },
   'Certificate of Residency': { fields: [NAME, AGE, BIRTH, CIVIL, F('residency_date', 'Residency Date', { type: 'date', max: 'today' }), ADDR, VALID_ID()] },
   'Letter of Residency': {
     fields: [NAME, F('letter_date', 'Date', { type: 'date', max: 'today' }), F('letter_file', 'Letter of Residency Upload', { type: 'file', wide: true, help: IDHELP }), VALID_ID()],
@@ -31,12 +31,11 @@ const FORMS = {
     guide: [['Letter of Residency', 'This letter provides proof of at least 6 months of residency. It is distinct from a Certificate of Residency.']]
   }
 };
-const PURPOSES = ['Medical Assistance', 'Financial Assistance', 'Burial Assistance', 'Employment', 'School Requirement', 'Other'];
 const GUIDE = [['Proof of Residency', 'Ensure your address matches your registration profile. Present 1 valid government ID upon claims.'], ['No Pending Obligations', 'Make sure you do not have active municipal penalties or pending dues on record.'], ['Claim Procedure', 'Bring your verification claim number and SMS notification when visiting the Express counter.']];
 
 const formFor = name => FORMS[name] || { fields: [] };
 const fileFields = name => formFor(name).fields.filter(f => f.type === 'file');
-/* some forms already ask WHY the document is needed (Purpose / Reason); the shared details step then must not ask again */
+/* some forms ask WHY the document is needed (Purpose / Reason) inside the form itself; the shared details step never asks for one */
 const purposeField = name => formFor(name).fields.find(f => f.isPurpose) || null;
 
 /* Validates the submitted answers against the form. Returns { answers:[{label,value}], errors:{key:msg} } (never trusts the browser). */
@@ -58,4 +57,4 @@ function validate(name, input, todayStr) {
   }
   return { answers, errors };
 }
-module.exports = { FORMS, PURPOSES, GUIDE, formFor, fileFields, purposeField, validate };
+module.exports = { FORMS, GUIDE, formFor, fileFields, purposeField, validate };

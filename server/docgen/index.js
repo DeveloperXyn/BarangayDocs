@@ -59,9 +59,8 @@ const SPECS = {
       const m = monthsSince(a.residency_date, ctx.today), y = Math.floor(m / 12);
       return { NAME: upper(a.full_name), AGE: String(Number(a.age)), BIRTH_LONG: longUpper(a.birth_date), ADDRESS: address(a.address, true),
         RESIDENCY: y >= 1 ? y + (y === 1 ? ' year' : ' years') : m >= 1 ? m + (m === 1 ? ' month' : ' months') : 'less than a month',
-        PURPOSE: clean(ctx.purpose) };
+        PURPOSE: clean(ctx.purpose) || 'any legal purpose' };   // the request form no longer asks for a purpose
     },
-    extraNeed: ctx => (clean(ctx.purpose) ? [] : ['Purpose of Request']),
     warn: (a, ctx) => { const w = [], c = ageOn(a.birth_date, ctx.today); if (c != null && Math.abs(c - Number(a.age)) > 1) w.push('The age entered (' + a.age + ') does not match the birth date (computed age ' + c + '). Please check before printing.'); return w; }
   }
 };

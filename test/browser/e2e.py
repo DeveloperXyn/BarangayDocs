@@ -61,15 +61,14 @@ with sync_playwright() as p:
     M.locator('.fg input[type=date]').nth(0).fill('1995-06-12')
     M.locator('.fg .in').nth(4).fill('1 Mabini Street')
     M.locator('.fg select').nth(1).select_option('Female')
-    M.locator('.fg .in').nth(6).fill('CTC-1'); M.locator('.fg input[type=date]').nth(1).fill('2026-01-09'); M.locator('.fg .in').nth(8).fill('Quezon City')
+    M.locator('.fg .in').nth(6).fill('12345678'); M.locator('.fg input[type=date]').nth(1).fill('2026-01-09'); M.locator('.fg .in').nth(8).fill('Quezon City')
     M.click('button:has-text("Application Details")'); check('missing upload blocks step 2','Upload a readable copy' in M.inner_text('.wiz'))
     f=tempfile.mktemp(suffix='.jpg'); open(f,'wb').write(b'\xff\xd8\xff\xe0'+b'0'*200+b'\xff\xd9')
     check('clearance form has two file inputs (Cedula + Valid ID)',M.locator('input[type=file]').count()==2)
     M.locator('input[type=file]').nth(0).set_input_files(f); M.click('button:has-text("Application Details")'); check('valid id still required','Upload a readable copy' in M.inner_text('.wiz'))
     M.locator('input[type=file]').nth(1).set_input_files(f); M.click('button:has-text("Application Details")')
     M.wait_for_selector('text=Shared Application Details')
-    M.click('button:has-text("Review application")'); check('step-3 validation (purpose)','Choose a purpose' in M.inner_text('.wiz'))
-    M.select_option('.wiz select','Employment'); import datetime
+    check('step 3 has no Purpose of Request select', M.locator('.wiz select').count()==0 and 'Purpose of Request' not in M.inner_text('.wiz')); import datetime
     check('step 3 has no preferred date field', M.locator('.wiz input[type=date]').count()==0 and 'Preferred' not in M.inner_text('.wiz')); M.click('button:has-text("Review application")')
     M.wait_for_selector('text=Review your Application'); check('review shows entered address','1 Mabini Street' in M.inner_text('.wiz'))
     M.click('button:has-text("Submit Request")'); M.wait_for_selector('.trk u'); trk=M.inner_text('.trk u'); check('tracking id generated',re.match(r'^BR-\d{4}-\d{5}-[A-Z2-9]{5}$',trk) is not None,trk)
@@ -88,7 +87,7 @@ with sync_playwright() as p:
     J.evaluate("loadNotifs(1)"); J.wait_for_timeout(600); J.goto(BASE+'/app.html#/resident'); J.wait_for_selector('.nbtn'); J.click('.nbtn'); J.wait_for_selector('.ni'); check('other resident has no request notification', trk not in J.inner_text('.npl') and J.locator('.ni').count()==1, J.inner_text('.npl')[:200])
     # --- admin review & status flow
     A.click('table tr:has(td.t) >> nth=0'); A.wait_for_selector('text=Application Form')
-    body=A.inner_text('main'); check('review: full details present','1 Mabini Street' in body and 'CTC-1' in body and 'Employment' in body)
+    body=A.inner_text('main'); check('review: full details present','1 Mabini Street' in body and '12345678' in body)
     check('review: both uploaded files listed',A.locator('a:text("View")').count()==2 and 'Valid ID' in A.inner_text('main'))
     check('review: no placeholder data','24 Mabini' not in body and 'valid-id.pdf' not in body and 'maria.santos@example.com' not in body)
     A.click('text=Continue to Approve'); check('approve blocked until checklist ticked','Tick every item' in A.inner_text('main') and A.locator('.ov').count()==0)
@@ -148,7 +147,7 @@ with sync_playwright() as p:
     M.locator('input[type=file]').nth(0).set_input_files(f); M.locator('.fg input.in:not([type=file])').nth(3).fill('Pedro Santos'); M.click('button:has-text("Application Details")')
     check('representative named -> representative ID required', 'Upload a readable copy' in M.inner_text('.wiz'))
     M.locator('.fg input.in:not([type=file])').nth(3).fill(''); M.click('button:has-text("Application Details")'); M.wait_for_selector('text=Shared Application Details'); check('no representative -> not required',True)
-    check('Indigency already asked the reason: shared step has no purpose select', M.locator('.wiz select').count()==0 and 'Purpose of Request' not in M.inner_text('.wiz'))
+    check('shared step has no purpose select (Indigency asks its own Reason in the form)', M.locator('.wiz select').count()==0 and 'Purpose of Request' not in M.inner_text('.wiz'))
     # admin deletes the announcement -> resident bell loses it
     A.goto(BASE+'/app.html#/admin/announce'); A.wait_for_selector('.an'); M.goto(BASE+'/app.html#/resident'); M.evaluate("loadNotifs(1)"); M.wait_for_timeout(400)
     M.click('.nbtn'); before=M.locator('.ni:has-text("Clean-Up Drive")').count(); M.click('.nbtn')
