@@ -342,3 +342,9 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear{display:non
   .fl .flm{align-items:flex-start}
   .fl .flt small{font-size:12px}
 }
+
+/* admin verification checklist: darker text and a clearly visible box and tick */
+label.vf{color:var(--ink);font-weight:500}
+label.vf input[type=checkbox]{appearance:none;-webkit-appearance:none;width:18px;height:18px;flex:none;border:2px solid var(--ink);border-radius:4px;background:#fff;display:grid;place-content:center;cursor:pointer}
+label.vf input[type=checkbox]:checked{background:var(--teal);border-color:var(--teal)}
+label.vf input[type=checkbox]:checked::after{content:"";width:5px;height:9px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}

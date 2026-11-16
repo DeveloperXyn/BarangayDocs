@@ -370,7 +370,7 @@ const rowsA=(S,cols,none,fn,withAct)=>S.items.map(r=>`<tr style="cursor:pointer"
 
 function adminDash(){
  const s=AD.stats||{},ok=AD.loaded&&!AD.err&&AD.stats,df=(s.receivedToday||0)-(s.receivedYesterday||0);
- const M=[['Total Received Today',s.receivedToday,df===0?'Same as yesterday':(df>0?'+':'')+df+' vs yesterday','#0284c7'],['Pending Verification',s.pending,'Requires prompt review','#64748b'],['Active Processing Queue',s.processing,'Currently on desk queue','#d97706'],['Approved Pickups Ready',s.ready,'Awaiting resident collection','#059669']];
+ const M=[['Total Received Today',s.receivedToday,df===0?'Same as yesterday':(df>0?'+':'')+df+' vs yesterday','#0284c7'],['Pending Verification',s.pending,'Not yet reviewed','#64748b'],['Active Processing Queue',s.processing,'Currently on desk queue','#d97706'],['Approved Pickups Ready',s.ready,'Awaiting resident collection','#059669']];
  return hdr('Barangay Staff Console','Process digital service requests, assign tracking schedules, and trigger citizen alerts.')+pendAlert()+hallCard()+
  `<div class="metrics m4">${M.map(m=>`<div class="metric a"><div class="mh">${m[0]}<i class="dot" style="background:${m[3]}"></i></div><div class="num h">${ok?m[1]:'–'}</div><small>${m[2]}</small></div>`).join('')}</div>
  <div class="tool">${srch('Search resident or tracking code...')}<div>${sel([['','All Document Types'],...AD.types],AD.type,"setF('AD','type',this.value)")}${sel(RGO.map(o=>o[0]?o:['','All dates']),AD.range,"setF('AD','range',this.value)")}</div></div>
