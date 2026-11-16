@@ -156,6 +156,7 @@ describe('BarangayDocs requests, announcements and notifications', () => {
   test('4-5. status flow: transitions are enforced, each change notifies the resident once, history is kept', async () => {
     const id = req1.id, p = (json) => admin.req('PATCH', API + '/admin/requests/' + id, { json });
     let r = await p({ action: 'complete' }); assert.equal(r.status, 409, 'cannot complete a pending request');
+    r = await p({ action: 'approve', claim_date: '2099-01-15' }); assert.equal(r.status, 409, 'cannot approve before Start Processing');
     r = await p({ action: 'approve' }); assert.equal(r.status, 422); assert.ok(r.data.fields.claim_date);
     r = await p({ action: 'reject' }); assert.equal(r.status, 422); assert.ok(r.data.fields.reason);
     r = await p({ action: 'bogus' }); assert.equal(r.status, 422);
@@ -263,8 +264,9 @@ describe('BarangayDocs requests, announcements and notifications', () => {
     assert.ok(!raw.includes('Here is a clearer photo'), "what the resident wrote is never public");
     // approved/ready exposes only the claim date
     const sub = (await maria.req('POST', API + '/requests', submitForm(typeId('Barangay ID'), {}, BID, { valid_id: JPG }))).data;
+    await admin.req('PATCH', API + '/admin/requests/' + sub.id, { json: { action: 'start' } });
     await admin.req('PATCH', API + '/admin/requests/' + sub.id, { json: { action: 'approve', claim_date: '2099-02-03', message: 'Bring a pen and a pink folder' } });
-    const ready = (await anon.req('GET', API + '/public/track/' + sub.trackingNo)).data; assert.equal(ready.timeline[1].claimDate, '2099-02-03'); assert.ok(!JSON.stringify(ready).includes('pink folder'));
+    const ready = (await anon.req('GET', API + '/public/track/' + sub.trackingNo)).data; assert.equal(ready.timeline.find(t => t.claimDate).claimDate, '2099-02-03'); assert.ok(!JSON.stringify(ready).includes('pink folder'));
     // guessing: wrong suffix, counting up, old format, junk -> the same 404
     const base = trk.split('-').slice(0, 3).join('-');
     for (const bad of [base + '-AAAAA', 'BR-2026-00001', 'BR-2026-00001-AAAAA', "BR-2026-00001-' OR 1=1", '../../etc/passwd', 'x'.repeat(200)]) { const g = await anon.req('GET', API + '/public/track/' + encodeURIComponent(bad)); assert.equal(g.status, 404, bad); assert.equal(g.data.message, 'We couldn’t find a request with that tracking code. Check the code and try again.'); }

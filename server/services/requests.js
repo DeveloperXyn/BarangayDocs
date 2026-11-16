@@ -10,7 +10,7 @@ const EVENT_LABEL = { reply: 'Additional Information Provided', submitted: 'Subm
 /* action -> { from: statuses it may start from, to: resulting status (null = status stays) } */
 const ACTIONS = {
   start: { from: ['pending'], to: 'processing' },
-  approve: { from: ['pending', 'processing'], to: 'ready' },
+  approve: { from: ['processing'], to: 'ready' },
   reject: { from: ['pending', 'processing'], to: 'rejected' },
   info: { from: ['pending', 'processing'], to: null },
   complete: { from: ['ready'], to: 'completed' }
