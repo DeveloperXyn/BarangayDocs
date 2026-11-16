@@ -195,7 +195,7 @@ Status flow: `pending -> processing -> ready -> completed`, `pending|processing 
 
 **Tracking codes** look like `BR-2026-00125-K7Q9X`: the random suffix means a code cannot be guessed by counting. Public tracking only works for codes in this format (older codes without the suffix can still be opened by their owner after signing in). The public response contains the status, dates and staff status messages (rejection reason, what information was requested, claim date) and nothing else: no name, contact details, address, document type, uploads, internal notes or anything the resident wrote. Lookups are rate-limited per IP and every unknown/malformed code gets the same "not found" reply.
 
-Announcement titles are limited to 50 characters. Forms that already ask for the purpose (Barangay Certification: Purpose, Certificate of Indigency: Reason) don't ask again in the shared details step, and no form asks for a preferred date.
+Announcement titles are limited to 50 characters. The shared details step has no "Purpose of Request" field; only Barangay Certification (Purpose) and Certificate of Indigency (Reason) ask for one, inside their own form. No form asks for a preferred date.
 
 Every built-in document form asks for a Valid ID upload (Clearance also asks for the Cedula; Indigency asks for the recipient's ID, plus the representative's ID when a representative is named). Uploads are stored one row per file in `request_files`.
 

@@ -68,8 +68,7 @@ with sync_playwright() as p:
     M.locator('input[type=file]').nth(0).set_input_files(f); M.click('button:has-text("Application Details")'); check('valid id still required','Upload a readable copy' in M.inner_text('.wiz'))
     M.locator('input[type=file]').nth(1).set_input_files(f); M.click('button:has-text("Application Details")')
     M.wait_for_selector('text=Shared Application Details')
-    M.click('button:has-text("Review application")'); check('step-3 validation (purpose)','Choose a purpose' in M.inner_text('.wiz'))
-    M.select_option('.wiz select','Employment'); import datetime
+    check('step 3 has no Purpose of Request select', M.locator('.wiz select').count()==0 and 'Purpose of Request' not in M.inner_text('.wiz')); import datetime
     check('step 3 has no preferred date field', M.locator('.wiz input[type=date]').count()==0 and 'Preferred' not in M.inner_text('.wiz')); M.click('button:has-text("Review application")')
     M.wait_for_selector('text=Review your Application'); check('review shows entered address','1 Mabini Street' in M.inner_text('.wiz'))
     M.click('button:has-text("Submit Request")'); M.wait_for_selector('.trk u'); trk=M.inner_text('.trk u'); check('tracking id generated',re.match(r'^BR-\d{4}-\d{5}-[A-Z2-9]{5}$',trk) is not None,trk)
@@ -148,7 +147,7 @@ with sync_playwright() as p:
     M.locator('input[type=file]').nth(0).set_input_files(f); M.locator('.fg input.in:not([type=file])').nth(3).fill('Pedro Santos'); M.click('button:has-text("Application Details")')
     check('representative named -> representative ID required', 'Upload a readable copy' in M.inner_text('.wiz'))
     M.locator('.fg input.in:not([type=file])').nth(3).fill(''); M.click('button:has-text("Application Details")'); M.wait_for_selector('text=Shared Application Details'); check('no representative -> not required',True)
-    check('Indigency already asked the reason: shared step has no purpose select', M.locator('.wiz select').count()==0 and 'Purpose of Request' not in M.inner_text('.wiz'))
+    check('shared step has no purpose select (Indigency asks its own Reason in the form)', M.locator('.wiz select').count()==0 and 'Purpose of Request' not in M.inner_text('.wiz'))
     # admin deletes the announcement -> resident bell loses it
     A.goto(BASE+'/app.html#/admin/announce'); A.wait_for_selector('.an'); M.goto(BASE+'/app.html#/resident'); M.evaluate("loadNotifs(1)"); M.wait_for_timeout(400)
     M.click('.nbtn'); before=M.locator('.ni:has-text("Clean-Up Drive")').count(); M.click('.nbtn')

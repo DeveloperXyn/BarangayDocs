@@ -78,7 +78,6 @@ describe('BarangayDocs requests, announcements and notifications', () => {
     const id = typeId('Certificate of Residency');
     let r = await maria.req('POST', API + '/requests', submitForm(id, {}, { full_name: '', age: 'abc' }));
     assert.equal(r.status, 422); assert.ok(r.data.fields.full_name && r.data.fields.age && r.data.fields.birth_date);
-    r = await maria.req('POST', API + '/requests', submitForm(id, { purpose: 'Hacking' }, CERT)); assert.equal(r.status, 422); assert.ok(r.data.fields.purpose);
     r = await maria.req('POST', API + '/requests', submitForm('99999', {}, CERT)); assert.equal(r.status, 422);
     assert.equal(nRows('SELECT COUNT(*) n FROM requests'), 0, 'invalid submissions create nothing');
     const RES = Object.assign({}, CERT, { residency_date: '2020-01-01' });
@@ -216,7 +215,7 @@ describe('BarangayDocs requests, announcements and notifications', () => {
     assert.equal((await admin.req('GET', API + '/admin/requests')).data.total, 4); assert.equal((await maria.req('GET', API + '/requests/' + tracking)).data.documentType, 'Certificate of Residency');
   });
 
-  test('no preferred date; purpose is not asked twice when the form already asks it', async () => {
+  test('no preferred date; no shared purpose field, only forms with their own Purpose/Reason record one', async () => {
     const cert = typeId('Barangay Certification'), t = types.find(t => t.name === 'Barangay Certification');
     assert.ok(!JSON.stringify(types).includes('preferred'), 'no form asks for a preferred date');
     assert.ok(t.fields.find(f => f.key === 'cert_purpose').isPurpose);
@@ -224,8 +223,10 @@ describe('BarangayDocs requests, announcements and notifications', () => {
     // no separate "purpose" field is sent at all -> the answer to the form's own Purpose is used
     let r = await maria.req('POST', API + '/requests', submitForm(cert, { purpose: '' }, A, { valid_id: JPG })); assert.equal(r.status, 201);
     assert.equal(S.db.raw.prepare('SELECT purpose FROM requests WHERE id=?').get(Number(r.data.id)).purpose, 'Medical');
-    // a form WITHOUT its own purpose still needs the shared one
-    r = await maria.req('POST', API + '/requests', submitForm(typeId('Barangay ID'), { purpose: '' }, BID, { valid_id: JPG })); assert.equal(r.status, 422); assert.ok(r.data.fields.purpose);
+    // a form WITHOUT its own purpose (Barangay ID) submits fine with no purpose, and any stray "purpose" value is ignored
+    r = await maria.req('POST', API + '/requests', submitForm(typeId('Barangay ID'), { purpose: '' }, BID, { valid_id: JPG })); assert.equal(r.status, 201);
+    assert.equal(S.db.raw.prepare('SELECT purpose FROM requests WHERE id=?').get(Number(r.data.id)).purpose, '');
+    assert.ok(!('purposes' in (await maria.req('GET', API + '/document-types')).data), 'no shared purposes list is served');
   });
 
   let infoReq;

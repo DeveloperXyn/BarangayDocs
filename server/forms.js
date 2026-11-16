@@ -31,12 +31,11 @@ const FORMS = {
     guide: [['Letter of Residency', 'This letter provides proof of at least 6 months of residency. It is distinct from a Certificate of Residency.']]
   }
 };
-const PURPOSES = ['Medical Assistance', 'Financial Assistance', 'Burial Assistance', 'Employment', 'School Requirement', 'Other'];
 const GUIDE = [['Proof of Residency', 'Ensure your address matches your registration profile. Present 1 valid government ID upon claims.'], ['No Pending Obligations', 'Make sure you do not have active municipal penalties or pending dues on record.'], ['Claim Procedure', 'Bring your verification claim number and SMS notification when visiting the Express counter.']];
 
 const formFor = name => FORMS[name] || { fields: [] };
 const fileFields = name => formFor(name).fields.filter(f => f.type === 'file');
-/* some forms already ask WHY the document is needed (Purpose / Reason); the shared details step then must not ask again */
+/* some forms ask WHY the document is needed (Purpose / Reason) inside the form itself; the shared details step never asks for one */
 const purposeField = name => formFor(name).fields.find(f => f.isPurpose) || null;
 
 /* Validates the submitted answers against the form. Returns { answers:[{label,value}], errors:{key:msg} } (never trusts the browser). */
@@ -58,4 +57,4 @@ function validate(name, input, todayStr) {
   }
   return { answers, errors };
 }
-module.exports = { FORMS, PURPOSES, GUIDE, formFor, fileFields, purposeField, validate };
+module.exports = { FORMS, GUIDE, formFor, fileFields, purposeField, validate };
