@@ -397,7 +397,7 @@ function revPg(){
  <div class="rg"><div class="col"><div class="pc"><h2 class="h">Resident Information</h2><div class="kv">${kv('Full name',e(r.name))}${kv('Unique ID',e(r.citizenId||'—'))}${kv('Email',e(r.email))}${kv('Phone number',e(r.phone||'—'))}${kv('Date of birth',r.dob?fmt(r.dob):'—')}</div></div>
  <div class="pc"><h2 class="h">Application Form</h2>${d.answers.length?`<div class="kv">${d.answers.map(a=>kv(e(a.label),e(a.value))).join('')}</div>`:'<p class="note">This document type has no document-specific form fields.</p>'}</div>
  <div class="pc"><h2 class="h">Uploaded Requirements</h2>${FL2.map(f=>`<div class="fl"><div style="display:flex;gap:12px;align-items:center"><span style="color:var(--sky)">${I('file')}</span><div><b>${e(f.label)}</b><small>${e(f.name)}</small></div></div><div><a href="${e(f.url)}" target="_blank" rel="noopener">View</a></div></div>`).join('')||'<p class="note">No files were uploaded with this request.</p>'}</div>
- <div class="pc"><div class="hd2"><h2 class="h">Request Status</h2><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">${ab(d.status)}${startBtn}</div></div>${hr}<h2 class="h" style="font-size:16px">Admin Notes</h2><textarea class="in" id="notes" maxlength="1000" aria-label="Internal review notes (never shown to the resident)" placeholder="Add internal review notes..." style="min-height:80px" oninput="RVW.notes=this.value">${e(RVW.notes)}</textarea>${acts}${RVW.msg?`<p class="er" role="alert">${e(RVW.msg)}</p>`:''}</div></div>
+ <div class="pc"><div class="hd2"><h2 class="h">Request Status</h2><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">${ab(d.status)}${startBtn}</div></div>${hr}<h2 class="h" style="font-size:16px">Admin Notes</h2><textarea class="in" id="notes" maxlength="1000" aria-label="Internal review notes (never shown to the resident)" placeholder="Add internal review notes..." style="min-height:80px" oninput="RVW.notes=this.value;noteSoon()" onblur="autoSaveNotes()">${e(RVW.notes)}</textarea><small id="notesSt" class="note" aria-live="polite" style="display:block;min-height:18px"></small>${acts}${RVW.msg?`<p class="er" role="alert">${e(RVW.msg)}</p>`:''}</div></div>
  <div class="col"><div class="pc"><h2 class="h">Document Details</h2><div class="kv one">${kv('Document type',e(d.documentType))}${d.purpose?kv('Purpose',e(d.purpose)):''}${kv('Submitted',dtm(d.submittedAt))}${d.claimDate?kv('Approved claim date',fmt(d.claimDate)):''}${kv('Resident remarks',e(d.comments||'—'))}${d.residentNote?kv('Message sent to resident',e(d.residentNote)):''}</div></div>
  ${d.status!=='rejected'?`<div class="pc"><h2 class="h">Official Document</h2><p class="note">Generate the official certificate from this resident’s submitted information, preview it, then print. Nothing is printed until you confirm.</p><div><button class="btn sm" ${RVW.busy?'disabled':''} onclick="openDoc()">Generate / Print Document</button></div></div>`:''}
  ${can('approve')?`<div class="pc"><h2 class="h">Verification Checklist</h2>${ck.map((c,i)=>`<label class="vf" style="cursor:pointer"><input type="checkbox" ${RVW.chk[i]?'checked':''} onchange="RVW.chk[${i}]=this.checked?1:0;render()" style="margin-right:8px">${c}</label>`).join('')}${all?'':'<p class="note">Tick every check to continue to approval.</p>'}</div>`:''}
@@ -416,6 +416,15 @@ async function act(action,extra){
 }
 const quick=a=>act(a);
 const saveNotes=()=>act('note');
+/* admin notes save themselves: a moment after typing stops and when the box loses focus (no re-render, so the cursor never jumps) */
+let ND=0;const noteSoon=()=>{clearTimeout(ND);const t=document.getElementById('notesSt');if(t)t.textContent='';ND=setTimeout(autoSaveNotes,800)};
+async function autoSaveNotes(){
+ clearTimeout(ND);const st=m=>{const t=document.getElementById('notesSt');if(t)t.textContent=m};
+ if(!RVW.data||RVW.noteBusy||RVW.busy||RVW.notes===(RVW.data.adminNotes||''))return;
+ const v=RVW.notes,id=RVW.id;RVW.noteBusy=1;st('Saving…');
+ try{const r=await http('PATCH','/admin/requests/'+encodeURIComponent(id),{action:'note',notes:v});if(RVW.id===id&&RVW.data)RVW.data.adminNotes=r.adminNotes||'';st('Notes saved.')}
+ catch(x){st('Could not save notes. '+emsg(x,'Please try again.'))}
+ RVW.noteBusy=0;if(RVW.id===id&&RVW.notes!==v)noteSoon()}
 function dc(a){const v=gv('f1'),m=a==='approve'?{claim_date:v,message:gv('f2')}:a==='reject'?{reason:v}:{message:v};
  if(!v){MD.err=a==='approve'?'Choose a claim date.':'This field is required.';return render()}act(a,m)}
 
